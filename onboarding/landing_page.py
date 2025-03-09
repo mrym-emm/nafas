@@ -30,12 +30,12 @@ st.markdown(
 # st.sidebar.header("Links")
 # st.sidebar.slider("Bill depth (mm)", 13.0, 21.5, 17.2)
 
-st.markdown(
-    """
-    <div class="top-links">
-        <a href="https://example.com/page1" target="_blank">Page 1</a>
-        <a href="https://example.com/page2" target="_blank">Page 2</a>
-    </div>
-""",
-    unsafe_allow_html=True,
-)
+# st.markdown(
+#     """
+#     <div class="top-links">
+#         <a href="https://example.com/page1" target="_blank">Page 1</a>
+#         <a href="https://example.com/page2" target="_blank">Page 2</a>
+#     </div>
+# """,
+#     unsafe_allow_html=True,
+# )

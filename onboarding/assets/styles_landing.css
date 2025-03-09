@@ -18,6 +18,16 @@ h1 {
     animation: fadeIn 1.5s ease-in forwards, moveUp 2s ease-in-out forwards 1.5s;
 }
 
+h3 {
+    font-weight: 200 !important;  
+    font-size: 16px !important;
+    font-style: normal;
+    text-align: center !important;
+    letter-spacing: 5px !important;
+    margin-top: 50px !important; 
+}
+
+
 h4 {
     font-weight: 200 !important;  
     font-size: 16px !important;
@@ -28,7 +38,7 @@ h4 {
     animation: fadeIn 1.5s ease-in forwards, moveUp 2s ease-in-out forwards 1.5s, fadeOut 1.5s ease-in forwards 3.5s;
 }
 
-/* Fade-in Animation */
+/* fade in animation */
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -38,7 +48,7 @@ h4 {
     }
 }
 
-/* Move Up Animation (starts after fade-in) */
+/* moving up animation */
 @keyframes moveUp {
     from {
         transform: translateY(0);

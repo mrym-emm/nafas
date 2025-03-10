@@ -24,7 +24,7 @@ h3 {
     font-style: normal;
     text-align: center !important;
     letter-spacing: 5px !important;
-    margin-top: 50px !important; 
+    margin-top: 0px !important; 
 }
 
 
@@ -37,6 +37,16 @@ h4 {
     opacity: 0;
     animation: fadeIn 1.5s ease-in forwards, moveUp 2s ease-in-out forwards 1.5s, fadeOut 1.5s ease-in forwards 3.5s;
 }
+
+.prompt-outside p {
+    text-align: center !important;
+    letter-spacing: 5px !important;
+    font-size: 20px !important;
+    text-decoration: underline;
+}
+
+ 
+
 
 /* fade in animation */
 @keyframes fadeIn {
@@ -73,3 +83,18 @@ h4 {
     position: relative;
     top: 20vh;  
 }
+
+/* for buttons */
+/* Style all buttons the same way */
+/* .stButton > button {
+    font-size: 6px !important;
+    font-weight: 500 !important;
+} */
+
+/* Hover effect for all buttons */
+/* .stButton > button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+} */
+
+

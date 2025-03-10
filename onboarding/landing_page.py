@@ -186,7 +186,7 @@ st.markdown(
 .stButton button span,
 div[data-testid="stHorizontalBlock"] div[data-testid="column"] div.stButton button,
 div.stButton > button > div > p {
-    font-size: 10px !important;
+    font-size: 14px !important;
     line-height: 1.5 !important;
     font-family: "Roboto Mono", monospace !important;
 }

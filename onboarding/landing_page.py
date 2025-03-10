@@ -97,15 +97,18 @@ st.markdown(
 )
 
 
-def get_aqi(station_id):
-    """fetch aqi, temp, wind from api"""
+def get_aqi_data(station_id):
+    """fetch aqi, temp, humidty from api"""
     url = f"https://api.waqi.info/feed/@{station_id}/?token={API_TOKEN}"
     response = requests.get(url)
 
     if response.status_code == 200:
         data = response.json()
         if data.get("status") == "ok":
-            return data["data"]["aqi"]
+            aqi = data["data"]["aqi"]
+            temperature = data["data"].get("iaqi", {}).get("t", {}).get("v", "N/A")
+            humidity = data["data"].get("iaqi", {}).get("h", {}).get("v", "N/A")
+            return aqi, temperature, humidity
         else:
             return "Invalid station ID or no data available."
     else:
@@ -173,7 +176,7 @@ cols = st.columns(len(states))
 st.markdown(
     """
 <style>
-/* Brutally specific selector to override Streamlit's default */
+/* need to to brute force the styling because streamlits default always override */
 .stButton > button,
 .stButton > button div,
 .stButton > button p,
@@ -187,31 +190,31 @@ div.stButton > button > div > p {
     font-family: "Roboto Mono", monospace !important;
 }
 
-/* Equal spacing between buttons */
+/* equal spacing between buttons */
 div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
     padding: 0 5px !important;
     display: flex !important;
     justify-content: center !important;
 }
 
-/* First column spacing */
+/* first column spacing */
 div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:first-child {
     padding-left: 0 !important;
 }
 
-/* Last column spacing */
+/* last column spacing */
 div[data-testid="stHorizontalBlock"] > div[data-testid="column"]:last-child {
     padding-right: 0 !important;
 }
 
-/* Button container styling */
+/* button container styling */
 div.stButton {
     display: flex !important;
     justify-content: center !important;
     width: 100% !important;
 }
 
-/* Button itself - with custom color */
+/* color of button before click */
 .stButton > button {
     width: 100% !important;
     margin: 0 !important;
@@ -223,7 +226,7 @@ div.stButton {
     transition: all 0.3s ease !important;
 }
 
-/* Hover effect */
+/* hover effect */
 .stButton > button:hover {
     background-color: #EFBF04 !important;
     color: white !important;
@@ -231,7 +234,7 @@ div.stButton {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
 }
 
-/* Active/clicked effect */
+/* effect when clicked */
 .stButton > button:active {
     transform: translateY(0) !important;
     background-color: #D4B030 !important;
@@ -253,8 +256,35 @@ if st.session_state.selected_state:
         "Select Location:", state_cities, key="city_dropdown"
     )
 
-# If a city is selected, fetch AQI
+
 if st.session_state.selected_city in station_id_dict:
     station_id = station_id_dict[st.session_state.selected_city]
-    aqi = get_aqi(station_id)
-    st.write(f"AQI for {st.session_state.selected_city}: {aqi}")
+    aqi, temperature, humidity = get_aqi_data(station_id)
+
+    # Create a three-column layout for AQI, Temperature, and Humidity
+    col1, col2, col3 = st.columns(3)
+
+    # Styling for cards
+    card_style = """
+        <div style="
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #E7CD78;
+            color: black;
+            font-size: 18px;
+            text-align: center;
+            box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
+            ">
+            <h3 style="margin: 0;">{}</h3>
+            <p style="margin: 0; font-size: 24px; font-weight: bold;">{}</p>
+        </div>
+    """
+
+    with col1:
+        st.markdown(card_style.format("AQI", aqi), unsafe_allow_html=True)
+    with col2:
+        st.markdown(
+            card_style.format("Temperature (°C)", temperature), unsafe_allow_html=True
+        )
+    with col3:
+        st.markdown(card_style.format("Humidity (%)", humidity), unsafe_allow_html=True)

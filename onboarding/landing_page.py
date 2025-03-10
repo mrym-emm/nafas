@@ -2,22 +2,13 @@ import streamlit as st
 import time
 import requests
 
+import os
+
 st.set_page_config(
     page_title="NAFAS", page_icon="🍃", layout="wide", initial_sidebar_state="collapsed"
 )
 
 
-# # Load CSS
-# def load_css():
-#     with open("styles_landing.css", "r") as f:
-#         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-
-
-# # apply css
-# load_css()
-
-
-import os
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 css_path = os.path.join(current_dir, "styles_landing.css")

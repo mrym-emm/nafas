@@ -1,11 +1,13 @@
 import streamlit as st
 import time
 import requests
-import os
 
 st.set_page_config(
     page_title="NAFAS", page_icon="🍃", layout="wide", initial_sidebar_state="auto"
 )
+
+## testing audio
+# st.audio("windchime.mp3", format="audio/mpeg", loop=True)
 
 # for on github
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -252,12 +254,8 @@ div.stButton {
 """,
     unsafe_allow_html=True,
 )
-# # Create buttons for states
-# for i, state in enumerate(states):
-#     with cols[i]:
-#         if st.button(state):
-#             st.session_state.selected_state = state  # Store state in session
-# First row of states (6 buttons)
+
+
 row1_cols = st.columns(6)
 
 for i, state in enumerate(states[:6]):
@@ -314,10 +312,6 @@ if st.session_state.selected_city in station_id_dict:
         st.markdown(card_style.format("Humidity (%)", humidity), unsafe_allow_html=True)
 
 
-
-
 # this creates a sidebar
 st.sidebar.header("Explore N A F A S")
-st.sidebar.page_link("pages/education_page.py", label="Home")
-
-
+st.sidebar.page_link("pages/Education.py")

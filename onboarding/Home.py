@@ -7,26 +7,24 @@ st.set_page_config(
     page_title="NAFAS", page_icon="🍃", layout="wide", initial_sidebar_state="auto"
 )
 
-## testing audio
-# st.audio("windchime.mp3", format="audio/mpeg", loop=True)
 
-# for on github
-current_dir = os.path.dirname(os.path.abspath(__file__))
-css_path = os.path.join(current_dir, "styles_landing.css")
+# ## for on github
+# # current_dir = os.path.dirname(os.path.abspath(__file__))
+# # css_path = os.path.join(current_dir, "styles_landing.css")
 
-with open(css_path, "r") as f:
-    css = f.read()
-    st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
+# # with open(css_path, "r") as f:
+# #     css = f.read()
+# #     st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
 
 
-# # Load CSS
-# def load_css():
-#     with open("styles_landing.css", "r") as f:
-#         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+# Load CSS
+def load_css():
+    with open("styles_landing.css", "r") as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 
-# # apply css
-# load_css()
+# apply css
+load_css()
 
 # landing page
 st.markdown(
@@ -125,6 +123,26 @@ def get_aqi_data(station_id):
             return "Invalid station ID or no data available."
     else:
         return "Error fetching data."
+
+
+def get_aqi_color(aqi):
+    """Returns color based on AQI value"""
+    try:
+        aqi_value = int(aqi)
+        if aqi_value <= 50:
+            return "#00E400"  # Green - Good
+        elif aqi_value <= 100:
+            return "#FFFF00"  # Yellow - Moderate
+        elif aqi_value <= 150:
+            return "#FF7E00"  # Orange - Unhealthy for Sensitive Groups
+        elif aqi_value <= 200:
+            return "#FF0000"  # Red - Unhealthy
+        elif aqi_value <= 300:
+            return "#8F3F97"  # Purple - Very Unhealthy
+        else:
+            return "#7E0023"  # Maroon - Hazardous
+    except (ValueError, TypeError):
+        return "#E7CD78"  # Default color if AQI is not a valid number
 
 
 states = [
@@ -251,6 +269,22 @@ div.stButton {
     transform: translateY(0) !important;
     background-color: #D4B030 !important;
 }
+
+/* Card title styles - centered */
+.card-title {
+    text-align: center !important;
+    margin: 0 !important;
+    font-size: 18px !important;
+    font-weight: bold !important;
+}
+
+/* Card value styles - centered and larger */
+.card-value {
+    text-align: center !important;
+    margin: 0 !important;
+    font-size: 28px !important;
+    font-weight: bold !important;
+}
 </style>
 """,
     unsafe_allow_html=True,
@@ -287,24 +321,51 @@ if st.session_state.selected_city in station_id_dict:
     # Create a three-column layout for AQI, Temperature, and Humidity
     col1, col2, col3 = st.columns(3)
 
-    # Styling for cards
+    # Get color for AQI based on value
+    aqi_color = get_aqi_color(aqi)
+
+    # Updated card style with centered text and color-coded AQI
+    aqi_card_style = f"""
+        <div style="
+            padding: 20px;
+            border-radius: 10px;
+            background-color: {aqi_color};
+            color: black;
+            text-align: center;
+            box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            ">
+            <div class="card-title">AQI</div>
+            <div class="card-value">{aqi}</div>
+        </div>
+    """
+
+    # Standard card style for Temp and Humidity
     card_style = """
         <div style="
             padding: 20px;
             border-radius: 10px;
             background-color: #E7CD78;
             color: black;
-            font-size: 18px;
             text-align: center;
             box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             ">
-            <h3 style="margin: 0;">{}</h3>
-            <p style="margin: 0; font-size: 24px; font-weight: bold;">{}</p>
+            <div class="card-title">{}</div>
+            <div class="card-value">{}</div>
         </div>
     """
 
     with col1:
-        st.markdown(card_style.format("AQI", aqi), unsafe_allow_html=True)
+        st.markdown(aqi_card_style, unsafe_allow_html=True)
     with col2:
         st.markdown(card_style.format("Temp (°C)", temperature), unsafe_allow_html=True)
     with col3:
@@ -318,3 +379,4 @@ for _ in range(2):
 # this creates a links
 st.page_link("pages/Learn.py")
 st.page_link("pages/Travel.py")
+st.page_link("pages/Activities.py")

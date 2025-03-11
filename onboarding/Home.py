@@ -8,23 +8,23 @@ st.set_page_config(
 )
 
 
-# ## for on github
-# # current_dir = os.path.dirname(os.path.abspath(__file__))
-# # css_path = os.path.join(current_dir, "styles_landing.css")
+## for on github
+current_dir = os.path.dirname(os.path.abspath(__file__))
+css_path = os.path.join(current_dir, "styles_landing.css")
 
-# # with open(css_path, "r") as f:
-# #     css = f.read()
-# #     st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
-
-
-# Load CSS
-def load_css():
-    with open("styles_landing.css", "r") as f:
-        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+with open(css_path, "r") as f:
+    css = f.read()
+    st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
 
 
-# apply css
-load_css()
+# # Load CSS
+# def load_css():
+#     with open("styles_landing.css", "r") as f:
+#         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+
+# # apply css
+# load_css()
 
 # landing page
 st.markdown(

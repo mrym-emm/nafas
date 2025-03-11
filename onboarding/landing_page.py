@@ -2,20 +2,27 @@ import streamlit as st
 import time
 import requests
 
-import os
-
 st.set_page_config(
     page_title="NAFAS", page_icon="🍃", layout="wide", initial_sidebar_state="collapsed"
 )
 
+## for on github
+# current_dir = os.path.dirname(os.path.abspath(__file__))
+# css_path = os.path.join(current_dir, "styles_landing.css")
+
+# with open(css_path, "r") as f:
+#     css = f.read()
+#     st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
 
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
-css_path = os.path.join(current_dir, "styles_landing.css")
+# Load CSS
+def load_css():
+    with open("styles_landing.css", "r") as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-with open(css_path, "r") as f:
-    css = f.read()
-    st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
+
+# apply css
+load_css()
 
 # landing page
 st.markdown(
@@ -83,13 +90,13 @@ station_id_dict = {
     "Kangar": 2599,
 }
 
-# st.write("Should you go out today?")
-# station_id = st.text_input("Enter Station ID:", "")
+
 st.markdown(
     """
     <div class="prompt-outside">
         <p>Real Time Air Quality Monitoring</p>
-        <h3>Should 👦🏻👧🏽 go out today?</h3>
+        <h3>Should 👨‍👩‍👧‍👦👨‍👩‍👧 go out today?</h3>
+        <h3>⬇️Select a state below⬇️</h3>
         
     </div>
 
@@ -142,7 +149,7 @@ cities = {
         "Segamat",
         "Tangkak",
     ],
-    "Melaka": ["Alor Gajah", "Bandaraya Melaka"],
+    "Melaka": ["Alor Gajah", "BandarRaya Melaka"],
     "Negeri Sembilan": ["Nilai", "Port Dickson", "Seremban"],
     "Selangor": [
         "Banting",
@@ -170,7 +177,7 @@ if "selected_city" not in st.session_state:
     st.session_state.selected_city = None
 
 # create column based on state available
-cols = st.columns(len(states))
+# cols = st.columns(len(states))
 
 
 # necessary styling for button, couldnt make it work in css
@@ -186,7 +193,7 @@ st.markdown(
 .stButton button span,
 div[data-testid="stHorizontalBlock"] div[data-testid="column"] div.stButton button,
 div.stButton > button > div > p {
-    font-size: 14px !important;
+    font-size: 11px !important;
     line-height: 1.5 !important;
     font-family: "Roboto Mono", monospace !important;
 }
@@ -244,11 +251,26 @@ div.stButton {
 """,
     unsafe_allow_html=True,
 )
-# Create buttons for states
-for i, state in enumerate(states):
-    with cols[i]:
+# # Create buttons for states
+# for i, state in enumerate(states):
+#     with cols[i]:
+#         if st.button(state):
+#             st.session_state.selected_state = state  # Store state in session
+# First row of states (6 buttons)
+row1_cols = st.columns(6)
+
+for i, state in enumerate(states[:6]):
+    with row1_cols[i]:
         if st.button(state):
-            st.session_state.selected_state = state  # Store state in session
+            st.session_state.selected_state = state
+
+# Second row of states (6 buttons)
+row2_cols = st.columns(6)
+for i, state in enumerate(states[6:]):
+    with row2_cols[i]:
+        if st.button(state, key=f"btn_{state}"):  # Need unique keys for second row
+            st.session_state.selected_state = state
+
 
 # If a state is selected, show city dropdown
 if st.session_state.selected_state:
@@ -289,3 +311,9 @@ if st.session_state.selected_city in station_id_dict:
         )
     with col3:
         st.markdown(card_style.format("Humidity (%)", humidity), unsafe_allow_html=True)
+
+
+# this creates a sidebar
+st.sidebar.header("User Input Parameters")
+
+

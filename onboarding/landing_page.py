@@ -142,7 +142,7 @@ cities = {
         "Segamat",
         "Tangkak",
     ],
-    "Melaka": ["Alor Gajah", "Bandarraya Melaka"],
+    "Melaka": ["Alor Gajah", "Bandaraya Melaka"],
     "Negeri Sembilan": ["Nilai", "Port Dickson", "Seremban"],
     "Selangor": [
         "Banting",

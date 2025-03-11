@@ -312,11 +312,11 @@ if st.session_state.selected_city in station_id_dict:
     with col3:
         st.markdown(card_style.format("Humidity (%)", humidity), unsafe_allow_html=True)
 
-st.write("+-" * 51)
+# st.write("+-" * 51)
 # add space
 for _ in range(2):
     st.write("")
-st.write("🧭")
+ 
 # this creates a links
 st.page_link("pages/Learn.py")
 

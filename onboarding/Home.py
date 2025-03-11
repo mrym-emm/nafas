@@ -316,6 +316,7 @@ st.write("+-" * 51)
 # add space
 for _ in range(2):
     st.write("")
+st.write("🧭")
+# this creates a links
+st.page_link("pages/Learn.py")
 
-
-# Centering the link

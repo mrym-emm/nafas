@@ -1,6 +1,7 @@
 import streamlit as st
 import time
 import requests
+import os
 
 st.set_page_config(
     page_title="NAFAS", page_icon="🍃", layout="wide", initial_sidebar_state="collapsed"

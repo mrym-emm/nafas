@@ -316,4 +316,22 @@ if st.session_state.selected_city in station_id_dict:
 # this creates a sidebar
 st.sidebar.header("User Input Parameters")
 
-
+st.markdown(
+    """
+    <style>
+    [data-testid="collapsedControl"] {
+        display: flex;
+        align-items: center;
+    }
+    
+    [data-testid="collapsedControl"]:after {
+        content: "CLICK ME";
+        margin-left: 10px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: white;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)

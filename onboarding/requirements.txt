@@ -1,6 +1,0 @@
-streamlit
-pandas
-numpy
-matplotlib
-plotly
-git+https://github.com/streamlit/gsheets-connection

@@ -75,8 +75,6 @@ import matplotlib.pyplot as plt
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-import gspread
-from google.oauth2 import service_account
 from streamlit_gsheets import GSheetsConnection
 
 
@@ -86,10 +84,22 @@ st.set_page_config(
 )
 
 
-url = "https://docs.google.com/spreadsheets/d/1c43XS6gjrZQdlMf7a32JsSZzdrLc7MitWCAA6NTXeBs/edit?usp=sharing"
+# url = "https://docs.google.com/spreadsheets/d/1c43XS6gjrZQdlMf7a32JsSZzdrLc7MitWCAA6NTXeBs/edit?usp=sharing"
 
 
-conn = st.connection("gsheets", type=GSheetsConnection)
+# conn = st.connection("gsheets", type=GSheetsConnection)
 
-data = conn.read(spreadsheet=url)
-st.dataframe(data)
+# data = conn.read(spreadsheet=url)
+# st.dataframe(data)
+
+import streamlit as st
+
+# Initialize connection.
+conn = st.connection("mysql", type="sql")
+
+# Perform query.
+df = conn.query("SELECT * from aqi_yearly;", ttl=600)
+
+# Print results.
+for row in df.itertuples():
+    st.write(f"{row.year}")

@@ -44,9 +44,6 @@ st.markdown(
 # give delay
 time.sleep(5)
 
-# Initialize full_data at the top level of the script
-full_data = None
-
 # the api token to retireve real time data
 API_TOKEN = "78d4dab9fd82b3952d79356efc7c1bd46763f540"
 
@@ -139,7 +136,7 @@ def get_aqi_data(station_id):
                 .get("avg", "N/A")
             )
 
-            # Return all the extracted data
+            # return all the extracted data
             return aqi, temperature, humidity, pm25, pm10
         else:
             return ("Invalid station ID or no data available.",)
@@ -147,8 +144,9 @@ def get_aqi_data(station_id):
         return ("Error fetching data.",)
 
 
+# returns the card color based on aqi. will only consider 3 since malaysia rarely above 100
 def get_aqi_color(aqi):
-    """Returns color based on AQI value"""
+
     try:
         aqi_value = int(aqi)
         if aqi_value <= 50:
@@ -156,7 +154,7 @@ def get_aqi_color(aqi):
         elif aqi_value <= 100:
             return "#FFBF00"  # yello is moderate
         else:
-            return "#7E0023"  # Maroon - Hazardous
+            return "#7E0023"  # marron - Hazardous
     except (ValueError, TypeError):
         return "#E7CD78"  # Default color if AQI is not a valid number
 
@@ -177,6 +175,7 @@ states = [
     "Kedah",
 ]
 
+# cities dictionary to link to state list. redundant but it works
 cities = {
     "Johor": [
         "Batu Pahat",
@@ -216,7 +215,7 @@ if "selected_city" not in st.session_state:
     st.session_state.selected_city = None
 
 
-# necessary styling for button, couldnt make it work in css
+# necessary styling for button, couldnt make it work in css, this is for states
 st.markdown(
     """
 <style>
@@ -312,15 +311,15 @@ for i, state in enumerate(states[:6]):
         if st.button(state):
             st.session_state.selected_state = state
 
-# Second row of states (6 buttons)
+# displaying second row of states
 row2_cols = st.columns(6)
 for i, state in enumerate(states[6:]):
     with row2_cols[i]:
-        if st.button(state, key=f"btn_{state}"):  # Need unique keys for second row
+        if st.button(state, key=f"btn_{state}"):  # unique key for second row
             st.session_state.selected_state = state
 
 
-# If a state is selected, show city dropdown
+# if user select state, then show city
 if st.session_state.selected_state:
     state_cities = cities.get(st.session_state.selected_state, [])
     st.session_state.selected_city = st.selectbox(
@@ -336,7 +335,7 @@ if st.session_state.selected_city in station_id_dict:
     # create a three-column layout for AQI, Temperature, and Humidity
     col1, col2, col3 = st.columns(3)
 
-    # Get color for AQI based on value
+    # Get color for aqi based on value
     aqi_color = get_aqi_color(aqi)
 
     # aqi card style
@@ -379,7 +378,7 @@ if st.session_state.selected_city in station_id_dict:
         </div>
     """
 
-    # for pm 2.5
+    # for pm 2.5 styling
     pm_card_style = """
         <div style="
             padding: 20px;
@@ -411,29 +410,30 @@ if st.session_state.selected_city in station_id_dict:
     for _ in range(3):
         st.write("")
 
+    # column for pollutant cards
     col4, col5 = st.columns(2)
 
     with col4:
         st.markdown(
-            pm_card_style.format("PM 2.5 (μg/m3)", (pm25 / 10)),
+            pm_card_style.format("PM 2.5 (μg/m3)", pm25),
             unsafe_allow_html=True,
         )
 
     with col5:
-        st.markdown(
-            pm_card_style.format("PM 10(μg/m3)", (pm10 / 10)), unsafe_allow_html=True
-        )
+        st.markdown(pm_card_style.format("PM 10(μg/m3)", pm10), unsafe_allow_html=True)
 
     st.divider()
 
-    # Add explanation of pollutants
+    # adding expander to put explanation of above metrics
     with st.expander("What does the above mean?"):
         st.markdown(
             """
+            - **AQI*: loren impsum
+            - **Temp**: loren impsum
+
             ### Asthma Air Pollutants To Watch For!
-            
-            - **PM2.5**: Fine particulate matter with diameter less than 2.5 micrometers. Can penetrate deep into lungs and bloodstream.
-            - **PM10**: Inhalable particles with diameter less than 10 micrometers.
+            - **PM2.5**: lorem ipsum
+            - **PM10**: lorem ipsum
             """
         )
 else:

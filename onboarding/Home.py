@@ -44,6 +44,9 @@ st.markdown(
 # give delay
 time.sleep(5)
 
+# Initialize full_data at the top level of the script
+full_data = None
+
 # the api token to retireve real time data
 API_TOKEN = "78d4dab9fd82b3952d79356efc7c1bd46763f540"
 
@@ -108,21 +111,40 @@ st.markdown(
 
 
 def get_aqi_data(station_id):
-    """fetch aqi, temp, humidty from api"""
+    """fetch complete air quality data from API and extract key metrics"""
     url = f"https://api.waqi.info/feed/@{station_id}/?token={API_TOKEN}"
     response = requests.get(url)
 
     if response.status_code == 200:
         data = response.json()
         if data.get("status") == "ok":
+            # Extract the basic data
             aqi = data["data"]["aqi"]
             temperature = data["data"].get("iaqi", {}).get("t", {}).get("v", "N/A")
             humidity = data["data"].get("iaqi", {}).get("h", {}).get("v", "N/A")
-            return aqi, temperature, humidity
+
+            pm10 = (
+                data["data"]
+                .get("forecast", {})
+                .get("daily", {})
+                .get("pm10", [{}])[0]
+                .get("avg", "N/A")
+            )
+
+            pm25 = (
+                data["data"]
+                .get("forecast", {})
+                .get("daily", {})
+                .get("pm25", [{}])[0]
+                .get("avg", "N/A")
+            )
+
+            # Return all the extracted data
+            return aqi, temperature, humidity, pm25, pm10
         else:
-            return "Invalid station ID or no data available."
+            return ("Invalid station ID or no data available.",)
     else:
-        return "Error fetching data."
+        return ("Error fetching data.",)
 
 
 def get_aqi_color(aqi):
@@ -130,21 +152,16 @@ def get_aqi_color(aqi):
     try:
         aqi_value = int(aqi)
         if aqi_value <= 50:
-            return "#00E400"  # Green - Good
+            return "#6BBF59"  # green is okay
         elif aqi_value <= 100:
-            return "#FFFF00"  # Yellow - Moderate
-        elif aqi_value <= 150:
-            return "#FF7E00"  # Orange - Unhealthy for Sensitive Groups
-        elif aqi_value <= 200:
-            return "#FF0000"  # Red - Unhealthy
-        elif aqi_value <= 300:
-            return "#8F3F97"  # Purple - Very Unhealthy
+            return "#FFBF00"  # yello is moderate
         else:
             return "#7E0023"  # Maroon - Hazardous
     except (ValueError, TypeError):
         return "#E7CD78"  # Default color if AQI is not a valid number
 
 
+# all states and city data to correspond to aqi
 states = [
     "Kuala Lumpur",
     "Selangor",
@@ -192,14 +209,11 @@ cities = {
 }
 
 
-# Ensure session state variables exist
+# ensuring session state exist
 if "selected_state" not in st.session_state:
     st.session_state.selected_state = None
 if "selected_city" not in st.session_state:
     st.session_state.selected_city = None
-
-# create column based on state available
-# cols = st.columns(len(states))
 
 
 # necessary styling for button, couldnt make it work in css
@@ -316,15 +330,16 @@ if st.session_state.selected_state:
 
 if st.session_state.selected_city in station_id_dict:
     station_id = station_id_dict[st.session_state.selected_city]
-    aqi, temperature, humidity = get_aqi_data(station_id)
 
-    # Create a three-column layout for AQI, Temperature, and Humidity
+    aqi, temperature, humidity, pm25, pm10 = get_aqi_data(station_id)
+
+    # create a three-column layout for AQI, Temperature, and Humidity
     col1, col2, col3 = st.columns(3)
 
     # Get color for AQI based on value
     aqi_color = get_aqi_color(aqi)
 
-    # Updated card style with centered text and color-coded AQI
+    # aqi card style
     aqi_card_style = f"""
         <div style="
             padding: 20px;
@@ -344,7 +359,7 @@ if st.session_state.selected_city in station_id_dict:
         </div>
     """
 
-    # Standard card style for Temp and Humidity
+    # card_style for temp n humidity
     card_style = """
         <div style="
             padding: 20px;
@@ -364,13 +379,67 @@ if st.session_state.selected_city in station_id_dict:
         </div>
     """
 
-    with col1:
-        st.markdown(aqi_card_style, unsafe_allow_html=True)
-    with col2:
-        st.markdown(card_style.format("Temp (°C)", temperature), unsafe_allow_html=True)
-    with col3:
-        st.markdown(card_style.format("Hum (%)", humidity), unsafe_allow_html=True)
+    # for pm 2.5
+    pm_card_style = """
+        <div style="
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #FFAB5B;
+            color: black;
+            text-align: center;
+            box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            ">
+            <div class="card-title">{}</div>
+            <div class="card-value">{}</div>
+        </div>
+    """
 
+    with col1:
+        st.markdown(card_style.format("🌤️ (°C)", temperature), unsafe_allow_html=True)
+
+    with col2:
+        st.markdown(aqi_card_style, unsafe_allow_html=True)
+    with col3:
+        st.markdown(card_style.format("💦 (%)", humidity), unsafe_allow_html=True)
+
+    # add space
+    for _ in range(3):
+        st.write("")
+
+    col4, col5 = st.columns(2)
+
+    with col4:
+        st.markdown(
+            pm_card_style.format("PM 2.5 (μg/m3)", (pm25 / 10)),
+            unsafe_allow_html=True,
+        )
+
+    with col5:
+        st.markdown(
+            pm_card_style.format("PM 10(μg/m3)", (pm10 / 10)), unsafe_allow_html=True
+        )
+
+    st.divider()
+
+    # Add explanation of pollutants
+    with st.expander("What does the above mean?"):
+        st.markdown(
+            """
+            ### Asthma Air Pollutants To Watch For!
+            
+            - **PM2.5**: Fine particulate matter with diameter less than 2.5 micrometers. Can penetrate deep into lungs and bloodstream.
+            - **PM10**: Inhalable particles with diameter less than 10 micrometers.
+            """
+        )
+else:
+    st.info("Please find your location!")
+
+st.divider()
 
 # add space
 for _ in range(2):

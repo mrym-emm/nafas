@@ -70,36 +70,32 @@
 
 import streamlit as st
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import plotly.express as px
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 from streamlit_gsheets import GSheetsConnection
-
 
 # Page configuration
 st.set_page_config(
     page_title="Air Quality & Asthma Insights Malaysia", page_icon="🫁", layout="wide"
 )
 
+# Define your Google Sheet URL
+url = "https://docs.google.com/spreadsheets/d/1c43XS6gjrZQdlMf7a32JsSZzdrLc7MitWCAA6NTXeBs/edit?usp=sharing"
 
-# url = "https://docs.google.com/spreadsheets/d/1c43XS6gjrZQdlMf7a32JsSZzdrLc7MitWCAA6NTXeBs/edit?usp=sharing"
+# Create a connection object
+conn = st.connection("gsheets", type=GSheetsConnection)
 
+# Read the data
+data = conn.read(spreadsheet=url)
+st.dataframe(data)
 
-# conn = st.connection("gsheets", type=GSheetsConnection)
+# import streamlit as st
+# import mysql.connector
 
-# data = conn.read(spreadsheet=url)
-# st.dataframe(data)
+# # Initialize connection.
+# conn = st.connection("mysql", type="sql")
 
-import streamlit as st
+# # Perform query.
+# df = conn.query("SELECT * from aqi_yearly;", ttl=600)
 
-# Initialize connection.
-conn = st.connection("mysql", type="sql")
-
-# Perform query.
-df = conn.query("SELECT * from aqi_yearly;", ttl=600)
-
-# Print results.
-for row in df.itertuples():
-    st.write(f"{row.year}")
+# # Print results.
+# for row in df.itertuples():
+#     st.write(f"{row.year}")

@@ -68,63 +68,82 @@
 #     st.header("Overview of Air Quality and Asthma in Malaysia")
 
 
-# import streamlit as st
-# import pandas as pd
-# from streamlit_gsheets import GSheetsConnection
-
-# # Page configuration
-# st.set_page_config(
-#     page_title="Air Quality & Asthma Insights Malaysia", page_icon="🫁", layout="wide"
-# )
-
-# # Define your Google Sheet URL
-# url = "https://docs.google.com/spreadsheets/d/1c43XS6gjrZQdlMf7a32JsSZzdrLc7MitWCAA6NTXeBs/edit?usp=sharing"
-
-# # Create a connection object
-# conn = st.connection("gsheets", type=GSheetsConnection)
-
-# # Read the data
-# data = conn.read(spreadsheet=url)
-# st.dataframe(data)
-
-# import streamlit as st
-# import mysql.connector
-
-# # Initialize connection.
-# conn = st.connection("mysql", type="sql")
-
-# # Perform query.
-# df = conn.query("SELECT * from aqi_yearly;", ttl=600)
-
-# # Print results.
-# for row in df.itertuples():
-#     st.write(f"{row.year}")
-
-
 import streamlit as st
 import pandas as pd
+import plotly.express as px
 
 # Page configuration
 st.set_page_config(
     page_title="Air Quality & Asthma Insights Malaysia", page_icon="🫁", layout="wide"
 )
 
-# Define your Google Sheet URL - converting to CSV export URL
+# connecting to google sheet api
 sheet_url = "https://docs.google.com/spreadsheets/d/1c43XS6gjrZQdlMf7a32JsSZzdrLc7MitWCAA6NTXeBs/edit?usp=sharing"
 csv_export_url = sheet_url.replace("/edit?usp=sharing", "/export?format=csv")
 
 
-# Read data directly using pandas
-@st.cache_data  # This caches the data to improve performance
-def load_data(url):
-    return pd.read_csv(url)
+# Title and introduction
+st.title("Insights on Air Quality and Asthma in Malaysia")
+st.markdown(
+    """
+This dashboard provides data insights about the relationship between air quality
+and asthma in Malaysia to help parents better understand and manage asthma triggers.
+"""
+)
+
+tab1, tab2, tab3, tab4 = st.tabs(
+    ["Overview", "AQI Trends", "Asthma Statistics", "Correlation Analysis"]
+)
 
 
-try:
-    data = load_data(csv_export_url)
-    st.dataframe(data)
-except Exception as e:
-    st.error(f"Error loading data: {e}")
-    st.info(
-        "Make sure your Google Sheet is publicly accessible (anyone with the link can view)"
-    )
+with tab1:
+    st.header("Overview of Air Quality and Asthma in Malaysia")
+
+    # Read data directly using pandas
+
+    @st.cache_data  # This caches the data to improve performance
+    def load_data(url):
+        return pd.read_csv(url)
+
+    try:
+        data = load_data(csv_export_url)
+        st.dataframe(data)
+    except Exception as e:
+        st.error(f"Error loading data: {e}")
+        st.info(
+            "Make sure your Google Sheet is publicly accessible (anyone with the link can view)"
+        )
+
+    if data is not None:
+        # Ensure the Year column is treated as an integer
+        data["Year"] = data["Year"].astype(int)
+
+        # Let the user select which states to visualize
+        selected_states = st.multiselect(
+            "Select states to display",
+            options=data.columns[1:],
+            default=["Kuala Lumpur"],
+        )
+
+        # Melt data for Plotly (from wide to long format)
+        df_melted = data.melt(
+            id_vars=["Year"],
+            value_vars=selected_states,
+            var_name="State",
+            value_name="AQI",
+        )
+
+        # Create line chart
+        fig = px.line(
+            df_melted,
+            x="Year",
+            y="AQI",
+            color="State",
+            markers=True,
+            title="Air Quality Index (AQI) Trends Over the Years",
+            labels={"AQI": "AQI Value", "Year": "Year", "State": "State"},
+        )
+
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.warning("Data not available.")

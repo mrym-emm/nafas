@@ -68,24 +68,24 @@
 #     st.header("Overview of Air Quality and Asthma in Malaysia")
 
 
-import streamlit as st
-import pandas as pd
-from streamlit_gsheets import GSheetsConnection
+# import streamlit as st
+# import pandas as pd
+# from streamlit_gsheets import GSheetsConnection
 
-# Page configuration
-st.set_page_config(
-    page_title="Air Quality & Asthma Insights Malaysia", page_icon="🫁", layout="wide"
-)
+# # Page configuration
+# st.set_page_config(
+#     page_title="Air Quality & Asthma Insights Malaysia", page_icon="🫁", layout="wide"
+# )
 
-# Define your Google Sheet URL
-url = "https://docs.google.com/spreadsheets/d/1c43XS6gjrZQdlMf7a32JsSZzdrLc7MitWCAA6NTXeBs/edit?usp=sharing"
+# # Define your Google Sheet URL
+# url = "https://docs.google.com/spreadsheets/d/1c43XS6gjrZQdlMf7a32JsSZzdrLc7MitWCAA6NTXeBs/edit?usp=sharing"
 
-# Create a connection object
-conn = st.connection("gsheets", type=GSheetsConnection)
+# # Create a connection object
+# conn = st.connection("gsheets", type=GSheetsConnection)
 
-# Read the data
-data = conn.read(spreadsheet=url)
-st.dataframe(data)
+# # Read the data
+# data = conn.read(spreadsheet=url)
+# st.dataframe(data)
 
 # import streamlit as st
 # import mysql.connector
@@ -99,3 +99,32 @@ st.dataframe(data)
 # # Print results.
 # for row in df.itertuples():
 #     st.write(f"{row.year}")
+
+
+import streamlit as st
+import pandas as pd
+
+# Page configuration
+st.set_page_config(
+    page_title="Air Quality & Asthma Insights Malaysia", page_icon="🫁", layout="wide"
+)
+
+# Define your Google Sheet URL - converting to CSV export URL
+sheet_url = "https://docs.google.com/spreadsheets/d/1c43XS6gjrZQdlMf7a32JsSZzdrLc7MitWCAA6NTXeBs/edit?usp=sharing"
+csv_export_url = sheet_url.replace("/edit?usp=sharing", "/export?format=csv")
+
+
+# Read data directly using pandas
+@st.cache_data  # This caches the data to improve performance
+def load_data(url):
+    return pd.read_csv(url)
+
+
+try:
+    data = load_data(csv_export_url)
+    st.dataframe(data)
+except Exception as e:
+    st.error(f"Error loading data: {e}")
+    st.info(
+        "Make sure your Google Sheet is publicly accessible (anyone with the link can view)"
+    )

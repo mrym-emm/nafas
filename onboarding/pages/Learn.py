@@ -97,89 +97,94 @@ with tab1:
     )
 
     # add expander
-with st.expander("Prevalence of Asthma in Children in Malaysia (Gender)"):
-    try:
-        data_asthma = load_data(csv_export_url_asthma)
-        # st.dataframe(data_asthma)
+    with st.expander("Prevalence of Asthma in Children in Malaysia (Gender)"):
+        try:
+            data_asthma = load_data(csv_export_url_asthma)
+            # st.dataframe(data_asthma)
 
-        # group by gender
-        gender_yearly = (
-            data_asthma.groupby(["year", "sex_name"])["val"].mean().reset_index()
-        )
+            # group by gender
+            gender_yearly = (
+                data_asthma.groupby(["year", "sex_name"])["val"].mean().reset_index()
+            )
 
-        # grouped bar chart
-        fig_gender = px.bar(
-            gender_yearly,
-            x="year",
-            y="val",
-            color="sex_name",
-            barmode="group",
-            title="Asthma Prevalence by Gender and Year (2005 - 2021)",
-            labels={"year": "Year", "val": "Prevalence", "sex_name": "Gender"},
-            color_discrete_map={"Male": "#2D7087", "Female": "#CF8282"},
-        )
+            # grouped bar chart
+            fig_gender = px.bar(
+                gender_yearly,
+                x="year",
+                y="val",
+                color="sex_name",
+                barmode="group",
+                title="Asthma Prevalence by Gender and Year (2005 - 2021)",
+                labels={"year": "Year", "val": "Prevalence", "sex_name": "Gender"},
+                color_discrete_map={"Male": "#2D7087", "Female": "#CF8282"},
+            )
 
-        # Customize the layout
-        fig_gender.update_layout(
-            xaxis=dict(tickmode="linear"),
-            legend_title="Gender",
-            yaxis_title="Prevalence Value",
-            plot_bgcolor="rgba(0,0,0,0)",
-            height=500,
-        )
+            # Customize the layout
+            fig_gender.update_layout(
+                xaxis=dict(tickmode="linear"),
+                legend_title="Gender",
+                yaxis_title="Prevalence Value",
+                plot_bgcolor="rgba(0,0,0,0)",
+                height=500,
+            )
 
-        # show plot
-        st.plotly_chart(fig_gender, use_container_width=True)
+            # show plot
+            st.plotly_chart(fig_gender, use_container_width=True)
 
-    except Exception as e:
-        st.error(f"Error loading data: {e}")
-        st.info("Please ensure database can be accessed")
+        except Exception as e:
+            st.error(f"Error loading data: {e}")
+            st.info("Please ensure database can be accessed")
 
-with st.expander("Prevalence of Asthma in Children in Malaysia (Age)"):
-    try:
+    with st.expander("Prevalence of Asthma in Children in Malaysia (Age)"):
+        try:
 
-        # Filter out the "under 5" age group
-        filtered_data = data_asthma[data_asthma["age_name"] != "<5 years"]
+            # since ps is about 6-17, will filter out below 5
+            filtered_data = data_asthma[data_asthma["age_name"] != "<5 years"]
 
-        # Group by year and age instead of gender
-        age_yearly = (
-            filtered_data.groupby(["year", "age_name"])["val"].mean().reset_index()
-        )
+            # group by year
+            age_yearly = (
+                filtered_data.groupby(["year", "age_name"])["val"].mean().reset_index()
+            )
 
-        # Create bar chart by age groups
-        fig_age = px.bar(
-            age_yearly,
-            x="year",
-            y="val",
-            color="age_name",
-            barmode="group",
-            title="Asthma Prevalence by Age Group and Year (2005 - 2021)",
-            labels={"year": "Year", "val": "Prevalence", "age_name": "Age Group"},
-            color_discrete_sequence=px.colors.qualitative.Pastel,  # You can choose different color schemes
-        )
+            # bar chart accoring to age
+            fig_age = px.bar(
+                age_yearly,
+                x="year",
+                y="val",
+                color="age_name",
+                barmode="group",
+                title="Asthma Prevalence by Age Group and Year (2005 - 2021)",
+                labels={"year": "Year", "val": "Prevalence", "age_name": "Age Group"},
+                color_discrete_sequence=px.colors.qualitative.Pastel,
+            )
 
-        # Customize the layout
-        fig_age.update_layout(
-            xaxis=dict(tickmode="linear"),
-            legend_title="Age Group",
-            yaxis_title="Prevalence Value",
-            plot_bgcolor="rgba(0,0,0,0)",
-            height=500,
-        )
+            # adding titles
+            fig_age.update_layout(
+                xaxis=dict(tickmode="linear"),
+                legend_title="Age Group",
+                yaxis_title="Prevalence Value",
+                plot_bgcolor="rgba(0,0,0,0)",
+                height=500,
+            )
 
-        # Show plot
-        st.plotly_chart(fig_age, use_container_width=True)
+            # show plot
+            st.plotly_chart(fig_age, use_container_width=True)
 
-    except Exception as e:
-        st.error(f"Error loading data: {e}")
-        st.info("Please ensure database can be accessed")
+        except Exception as e:
+            st.error(f"Error loading data: {e}")
+            st.info("Please ensure database can be accessed")
 
 
 # Guide for parents
 #############################################################################################
+
 with tab2:
     st.header("Understanding how the air affects your child 🧒")
     st.subheader("And what to look out for!")
+
+    st.markdown(
+        "![Alt Text](https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExbjlpanpnbTVyYmN5MGptaWI2djN3cmZvd3lxNTlhZ25lMW93MDYybSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/ifIXLnBzbnQWdpyafa/giphy.gif)"
+    )
 
     col1, col2 = st.columns(2)
 

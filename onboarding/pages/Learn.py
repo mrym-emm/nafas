@@ -31,13 +31,27 @@ and asthma in Malaysia to help parents better understand and manage asthma trigg
 """
 )
 
-tab1, tab2 = st.tabs(["AQI & Asthma Trends", "Understanding Asthma in Children"])
+tab1, tab2, tab3 = st.tabs(
+    ["AQI & Asthma Trends", "Asthma Trends", "Understanding Asthma in Children"]
+)
 
 
 with tab1:
-    st.header("Overview of Air Quality and Asthma in Malaysia")
+    st.header("Overview of Air Quality in Malaysia by State")
 
-    # read data directly using pandas
+    # add free stock image
+    st.markdown(
+        '<img src="https://img.freepik.com/free-vector/diagram-showing-air-quality-index-with-color-scales_1308-40093.jpg?t=st=1741897924~exp=1741901524~hmac=547e53de934df60164787ec580e413590c0b8954d2d344af46c968988f8328ad&w=826" width="400">',
+        unsafe_allow_html=True,
+    )
+
+    for _ in range(3):
+        st.write("")
+
+    st.markdown(
+        "The below data is retrieved from the following <a href='https://www.kaggle.com/datasets/ynshung/malaysia-air-pollution-index' target='_self'>Kaggle.</a>",
+        unsafe_allow_html=True,
+    )
 
     # caches the data to improve performance
     @st.cache_data
@@ -82,13 +96,16 @@ with tab1:
         )
 
         st.plotly_chart(fig, use_container_width=True)
+
+        st.write("`Write something here lroem ipsum`")
     else:
         st.warning("Data not available.")
 
     st.divider()
 
-    # loading asthma dataset
-    ##############################################################################################
+# loading asthma dataset
+##############################################################################################
+with tab2:
     st.subheader("Asthma Cases in Children👇")
 
     st.markdown(
@@ -174,11 +191,13 @@ with tab1:
             st.error(f"Error loading data: {e}")
             st.info("Please ensure database can be accessed")
 
+        st.divider()
+
 
 # Guide for parents
 #############################################################################################
 
-with tab2:
+with tab3:
     st.header("Understanding how the air affects your child 🧒")
     st.subheader("And what to look out for!")
 

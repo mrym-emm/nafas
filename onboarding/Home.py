@@ -2,6 +2,9 @@ import streamlit as st
 import time
 import requests
 import os
+import pandas as pd
+import plotly as px
+import plotly.graph_objects as go
 
 st.set_page_config(
     page_title="NAFAS", page_icon="🍃", layout="wide", initial_sidebar_state="auto"
@@ -31,7 +34,7 @@ st.markdown(
     """
     <div class="container">
         <h1>𖠋 N A F A S 𖠋</h1>
-        <h4>because everyone deserves the chance to breathe</h4>
+        <h4>because every child deserves the chance to breathe</h4>
 
     </div>
 
@@ -136,8 +139,16 @@ def get_aqi_data(station_id):
                 .get("avg", "N/A")
             )
 
+            o3 = (
+                data["data"]
+                .get("forecast", {})
+                .get("daily", {})
+                .get("o3", [{}])[0]
+                .get("avg", "N/A")
+            )
+
             # return all the extracted data
-            return aqi, temperature, humidity, pm25, pm10
+            return aqi, temperature, humidity, pm25, pm10, o3
         else:
             return ("Invalid station ID or no data available.",)
     else:
@@ -330,7 +341,7 @@ if st.session_state.selected_state:
 if st.session_state.selected_city in station_id_dict:
     station_id = station_id_dict[st.session_state.selected_city]
 
-    aqi, temperature, humidity, pm25, pm10 = get_aqi_data(station_id)
+    aqi, temperature, humidity, pm25, pm10, o3 = get_aqi_data(station_id)
 
     # create a three-column layout for AQI, Temperature, and Humidity
     col1, col2, col3 = st.columns(3)
@@ -338,7 +349,7 @@ if st.session_state.selected_city in station_id_dict:
     # Get color for aqi based on value
     aqi_color = get_aqi_color(aqi)
 
-    # aqi card style
+    # aqi card style with conditional message
     aqi_card_style = f"""
         <div style="
             padding: 20px;
@@ -358,32 +369,24 @@ if st.session_state.selected_city in station_id_dict:
         </div>
     """
 
+    if int(aqi) <= 49:
+        st.markdown(
+            "<div style='text-align: center; font-family: \"Roboto Mono\", monospace;'>😷Generally safe, consider masks for sever asthma child!😷</div>",
+            unsafe_allow_html=True,
+        )
+
+    elif int(aqi) > 50 and int(aqi) <= 100:
+        st.markdown(
+            "<div style='text-align: center; font-family: \"Roboto Mono\", monospace;'>Children should limit prolong exposure!</div>",
+            unsafe_allow_html=True,
+        )
+
     # card_style for temp n humidity
     card_style = """
         <div style="
             padding: 20px;
             border-radius: 10px;
             background-color: #E7CD78;
-            color: black;
-            text-align: center;
-            box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            ">
-            <div class="card-title">{}</div>
-            <div class="card-value">{}</div>
-        </div>
-    """
-
-    # for pm 2.5 styling
-    pm_card_style = """
-        <div style="
-            padding: 20px;
-            border-radius: 10px;
-            background-color: #FFAB5B;
             color: black;
             text-align: center;
             box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
@@ -407,35 +410,67 @@ if st.session_state.selected_city in station_id_dict:
         st.markdown(card_style.format("💦 (%)", humidity), unsafe_allow_html=True)
 
     # add space
-    for _ in range(3):
+    for _ in range(1):
         st.write("")
 
-    # column for pollutant cards
-    col4, col5 = st.columns(2)
+    labels_pollutant = ["PM2.5", "PM10", "O3"]
+    pollutant_data = [pm25, pm10, o3]
 
-    with col4:
-        st.markdown(
-            pm_card_style.format("PM 2.5 (μg/m3)", pm25),
-            unsafe_allow_html=True,
+    pollutant_df = pd.DataFrame(
+        {"Pollutant": labels_pollutant, "Value": pollutant_data}
+    )
+
+    # create fig in plotly
+    fig = go.Figure(
+        data=go.Bar(
+            x=labels_pollutant,
+            y=pollutant_data,
+            marker_color=["#FF9999", "#66B2FF", "#99FF99"],
         )
+    )
 
-    with col5:
-        st.markdown(pm_card_style.format("PM 10(μg/m3)", pm10), unsafe_allow_html=True)
+    fig.update_layout(title="Pollutants in air")
+
+    st.plotly_chart(fig)
 
     st.divider()
 
     # adding expander to put explanation of above metrics
-    with st.expander("What does the above mean?"):
-        st.markdown(
-            """
-            - **AQI*: loren impsum
-            - **Temp**: loren impsum
+    with st.expander("How does this affect your child?"):
 
-            ### Asthma Air Pollutants To Watch For!
-            - **PM2.5**: lorem ipsum
-            - **PM10**: lorem ipsum
-            """
+        info_df = pd.DataFrame(
+            {
+                "Factor": [
+                    "**Temperature**",
+                    "**Air Quality Index (AQI)**",
+                    "**Humidity**",
+                    "**PM 2.5 levels**",
+                    "**PM 10 levels**",
+                    "**O3 levels**",
+                ],
+                "Explanation": [
+                    "Hot weather can worsen asthma symptoms as higher temperatures can lead to increased respiratory issues. Heat can also increase air pollution levels, triggering asthma attacks in children.",
+                    "AQI indicates the quality of air. Values below 50 are generally safe, `51-100` may affect sensitive groups, and values above `100` can impact your child's respiratory health and trigger asthma symptoms.",
+                    "High humidity helps common allergens like dust mites and mold thrive, aggravating allergic asthma.",
+                    "Fine particulate matter that can penetrate deep into the lungs. Levels above `12 μg/m³` can irritate airways and trigger asthma symptoms in children.",
+                    "Larger particles that can irritate the throat and upper respiratory system. Can worsen asthma symptoms when levels exceed `50 μg/m³`.",
+                    "Ground-level ozone that forms from pollutants reacting with sunlight. Can inflame airways and reduce lung function in children with asthma, especially during outdoor activities.",
+                ],
+            }
         )
+
+        st.table(info_df)
+
+        st.markdown(
+            "<a href='https://www.researchgate.net/figure/Air-quality-index-AQI-values-PM25-and-PM10-conc-color-codes-air-pollutant-level-of_tbl1_343404673' target='_self'>Source</a>",
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            "<a href='https://jom-nafas.streamlit.app/Learn' target='_self'>➡️Learn More Here⬅️</a>",
+            unsafe_allow_html=True,
+        )
+
+
 else:
     st.info("Please find your location!")
 

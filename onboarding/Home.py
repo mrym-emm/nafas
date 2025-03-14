@@ -370,14 +370,19 @@ if st.session_state.selected_city in station_id_dict:
     """
 
     if int(aqi) <= 49:
+        for _ in range(2):
+            st.write(" ")
         st.markdown(
             "<div style='text-align: center; font-family: \"Roboto Mono\", monospace;'>😷Generally safe, consider masks for sever asthma child!😷</div>",
             unsafe_allow_html=True,
         )
 
     elif int(aqi) > 50 and int(aqi) <= 100:
+
+        for _ in range(2):
+            st.write(" ")
         st.markdown(
-            "<div style='text-align: center; font-family: \"Roboto Mono\", monospace;'>Children should limit prolong exposure!</div>",
+            "<div style='text-align: center; font-family: \"Roboto Mono\", monospace;'>❗Children should limit prolong exposure!❗</div>",
             unsafe_allow_html=True,
         )
 
@@ -435,6 +440,7 @@ if st.session_state.selected_city in station_id_dict:
 
     st.divider()
 
+    st.subheader("⬇️Open Me⬇️")
     # adding expander to put explanation of above metrics
     with st.expander("How does this affect your child?"):
 
@@ -462,11 +468,7 @@ if st.session_state.selected_city in station_id_dict:
         st.table(info_df)
 
         st.markdown(
-            "<a href='https://www.researchgate.net/figure/Air-quality-index-AQI-values-PM25-and-PM10-conc-color-codes-air-pollutant-level-of_tbl1_343404673' target='_self'>Source</a>",
-            unsafe_allow_html=True,
-        )
-        st.markdown(
-            "<a href='https://jom-nafas.streamlit.app/Learn' target='_self'>➡️Learn More Here⬅️</a>",
+            "The above information is <a href='https://www.researchgate.net/figure/Air-quality-index-AQI-values-PM25-and-PM10-conc-color-codes-air-pollutant-level-of_tbl1_343404673' target='_self'>sourced.</a>",
             unsafe_allow_html=True,
         )
 
@@ -479,7 +481,7 @@ st.divider()
 # add space
 for _ in range(2):
     st.write("")
-
+st.markdown("<b><u>More Links</u></b>", unsafe_allow_html=True)
 # this creates a links
 st.page_link("pages/Learn.py")
 st.page_link("pages/Travel.py")

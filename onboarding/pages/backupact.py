@@ -760,112 +760,6 @@
 # #         st.markdown("- Water-based activities that may reduce pollen exposure")
 
 
-# # def display_general_info():
-# #     """Display general information about air quality and asthma"""
-# #     st.markdown("## Understanding Air Quality and Asthma")
-
-# #     col1, col2 = st.columns(2)
-
-# #     with col1:
-# #         st.markdown("### Air Quality Index (AQI) Categories")
-# #         aqi_data = {
-# #             "Category": [
-# #                 "Good",
-# #                 "Moderate",
-# #                 "Unhealthy for Sensitive Groups",
-# #                 "Unhealthy",
-# #                 "Very Unhealthy",
-# #                 "Hazardous",
-# #             ],
-# #             "Range": ["0-50", "51-100", "101-150", "151-200", "201-300", "301+"],
-# #             "Impact": [
-# #                 "Minimal",
-# #                 "Minor",
-# #                 "Moderate",
-# #                 "Significant",
-# #                 "Severe",
-# #                 "Extreme",
-# #             ],
-# #         }
-
-# #         st.dataframe(pd.DataFrame(aqi_data), hide_index=True)
-
-# #     with col2:
-# #         st.markdown("### How Air Quality Affects Asthma")
-# #         st.markdown(
-# #             """
-# #         Poor air quality can trigger asthma symptoms by:
-# #         - Irritating airways
-# #         - Causing inflammation
-# #         - Triggering bronchospasm
-# #         - Increasing mucus production
-
-# #         Children are especially vulnerable because:
-# #         - Their lungs are still developing
-# #         - They breathe more air per pound of body weight
-# #         - They often spend more time outdoors
-# #         """
-# #         )
-
-
-# # This function would be called from your main app
-# # Example:
-# # activity_risk_assessment_page()
-
-
-# import streamlit as st
-# from streamlit_extras.autocomplete import autocomplete
-# import requests
-
-
-# # Function to get place suggestions as user types
-# def get_place_suggestions(query):
-#     if not query or len(query) < 3:
-#         return []
-
-#     try:
-#         # Use OpenStreetMap Nominatim API for suggestions
-#         url = (
-#             f"https://nominatim.openstreetmap.org/search?q={query}&format=json&limit=5"
-#         )
-#         response = requests.get(url, headers={"User-Agent": "ActivityRiskApp"})
-#         data = response.json()
-
-#         # Extract place names from results
-#         places = [f"{item.get('display_name')}" for item in data]
-#         return places
-#     except:
-#         return []
-
-
-# # Create the autocomplete search bar
-# selected_place = autocomplete(
-#     "Search for location:",
-#     get_place_suggestions,
-#     placeholder="Type to search for a location (e.g., Shah Alam)",
-#     on_select=lambda result: result,
-#     debounce_time=300,  # Wait 300ms after typing before making API request
-# )
-
-# # Process the selected place if user makes a selection
-# if selected_place:
-#     st.success(f"Selected: {selected_place}")
-
-#     # Get coordinates for the selected place
-#     try:
-#         url = f"https://nominatim.openstreetmap.org/search?q={selected_place}&format=json&limit=1"
-#         response = requests.get(url, headers={"User-Agent": "ActivityRiskApp"})
-#         data = response.json()
-
-#         if data:
-#             lat = float(data[0]["lat"])
-#             lon = float(data[0]["lon"])
-#             st.session_state.latitude = lat
-#             st.session_state.longitude = lon
-#             st.session_state.location_name = selected_place
-#             st.write(f"Coordinates: {lat}, {lon}")
-#     except Exception as e:
-#         st.error(f"Error getting coordinates: {e}")
 from streamlit_searchbox import st_searchbox
 import pandas as pd
 import streamlit as st
@@ -924,6 +818,7 @@ try:
                     "Sungai Buloh",
                     "Hulu Langat",
                     "Kuala Selangor",
+                    "Kemaman",
                 ]
             }
         )
@@ -1002,15 +897,11 @@ try:
 
             st.header("Asthma Information")
             asthma_severity = st.radio(
-                "Asthma Severity Level", ["Mild", "Moderate", "Severe"], index=1
+                "Asthma Severity Level",
+                ["Moderate", "Severe", "Life Threatening"],
+                index=1,
             )
             st.divider()
-
-            st.header("Type of Activity")
-            activity_type = st.selectbox(
-                "Categories",
-                ["Light", "Moderate", "Intense"],
-            )
 
             # Create the button in the sidebar
             get_recommendation = st.button("Get Recommendations", type="primary")
@@ -1021,13 +912,220 @@ try:
             with main_content_placeholder.container():
                 st.header("The verdict?")
 
+                # since thers a few factors, will rank
+                if aqi <= 50:
+                    aqi_category = "Good"
+                elif aqi <= 100:
+                    aqi_category = "Moderate"
+                elif aqi <= 150:
+                    aqi_category = "Unhealthy for Sensitive Groups"
+                elif aqi <= 200:
+                    aqi_category = "Unhealthy"
+                elif aqi <= 300:
+                    aqi_category = "Very Unhealthy"
+                else:
+                    aqi_category = "Hazardous"
+
+                # determine category based on PM2.5
+                if pm25 <= 12:
+                    pm25_category = "Good"
+                elif pm25 <= 35.4:
+                    pm25_category = "Moderate"
+                elif pm25 <= 55.4:
+                    pm25_category = "Unhealthy for Sensitive Groups"
+                elif pm25 <= 150.4:
+                    pm25_category = "Unhealthy"
+                elif pm25 <= 250.4:
+                    pm25_category = "Very Unhealthy"
+                else:
+                    pm25_category = "Hazardous"
+
+                # compare which one is worser, pm2.5 or AQI
+                category_ranking = [
+                    "Good",
+                    "Moderate",
+                    "Unhealthy for Sensitive Groups",
+                    "Unhealthy",
+                    "Very Unhealthy",
+                    "Hazardous",
+                ]
+                aqi_rank = category_ranking.index(aqi_category)
+                pm25_rank = category_ranking.index(pm25_category)
+
+                if pm25_rank > aqi_rank:
+                    air_quality_category = pm25_category
+                else:
+                    air_quality_category = aqi_category
+
+                # now check asthma severity
+                recommendation = ""
+                if air_quality_category == "Good":
+                    if asthma_severity == "Moderate":
+                        recommendation = (
+                            "Safe for outdoor activities with normal precautions"
+                        )
+                    elif asthma_severity == "Severe":
+                        recommendation = (
+                            "Safe with extra precautions and medication on hand"
+                        )
+                    elif asthma_severity == "Life Threatening":
+                        recommendation = (
+                            "Limited outdoor activity recommended, keep sessions short"
+                        )
+
+                elif air_quality_category == "Moderate":
+                    if asthma_severity == "Moderate":
+                        recommendation = "Generally safe, but monitor symptoms"
+                    elif asthma_severity == "Severe":
+                        recommendation = "Caution advised, limit strenuous activities"
+                    elif asthma_severity == "Life Threatening":
+                        recommendation = "Indoor activities recommended"
+
+                elif air_quality_category == "Unhealthy for Sensitive Groups":
+                    if asthma_severity == "Moderate":
+                        recommendation = (
+                            "Safe with frequent breaks and monitoring symptoms"
+                        )
+                    else:
+                        recommendation = "Outdoor activities not recommended"
+
+                else:  # worst case scenario
+                    recommendation = (
+                        "Outdoor activities not recommended for children with asthma"
+                    )
+
+                # display assesmment
+                if "not recommended" in recommendation:
+                    st.error(recommendation)
+                elif "Caution" in recommendation or "Limited" in recommendation:
+                    st.warning(recommendation)
+                else:
+                    st.success(recommendation)
                 st.write(aqi, pm25)
-                if aqi > 50:
-                    st.write("more thn 50")
 
         # this is the block to describe the inputs
         else:
-            st.write("hey")
+            col1, col2 = st.columns(2)
+            with col1:
+                st.markdown(
+                    """
+                    <div style="text-align: center;text-decoration: underline">
+                        <h3>🏙️Why does your city matter?🏙️</h3>
+                    </div>""",
+                    unsafe_allow_html=True,
+                )
+
+                aqi_data = {
+                    "AQI": [
+                        "0 - 50",
+                        "51 - 100",
+                        "101 - 150",
+                        "151 - 200",
+                        "201 - 300",
+                        "Above 300",
+                    ],
+                    "PM2.5": [
+                        "0 - 12",
+                        "12.1 - 35.4",
+                        "35.5 - 55.4",
+                        "55.5 - 150.4",
+                        "150.5 - 250.4",
+                        "Above 250.5",
+                    ],
+                    "Health Concern": [
+                        "Good",
+                        "Moderate",
+                        "Unhealthy for sensitive groups",
+                        "Unhealthy",
+                        "Very unhealthy",
+                        "Hazardous",
+                    ],
+                }
+
+                aqi_df = pd.DataFrame(aqi_data)
+
+                def highlight_health_concern(val):
+                    color_map = {
+                        "Good": "#7ABD7E",
+                        "Moderate": "#F8D66D",
+                        "Unhealthy for sensitive groups": "#FFB54C",
+                        "Unhealthy": "#FF6961",
+                        "Very unhealthy": "#CC93C2",
+                        "Hazardous": "#ba1a0f",
+                    }
+                    return f"background-color: {color_map.get(val, 'white')}; color: white;"
+
+                # apply style to health concern column
+                styled_df = aqi_df.style.applymap(
+                    highlight_health_concern, subset=["Health Concern"]
+                )
+
+                st.dataframe(styled_df, width=800, hide_index=True)
+
+                st.info(
+                    "**Urban areas tend to have poorer air quality due to industrial emissions, traffic pollution, and limited green spaces.**"
+                )
+                st.markdown(
+                    """<p>Source: <a href='https://www.researchgate.net/publication/343404673/figure/tbl1/AS:920630392287232@1596506798348/Air-quality-index-AQI-values-PM25-and-PM10-conc-color-codes-air-pollutant-level-of.png' target='_blank' >Research Gate</a> </p>""",
+                    unsafe_allow_html=True,
+                )
+
+            # information on asthma severity
+            with col2:
+
+                st.markdown(
+                    """
+                    <div style="text-align: center;text-decoration: underline">
+                        <h3>😷How sever is your child's asthma?😷</h3>
+                    </div>""",
+                    unsafe_allow_html=True,
+                )
+
+                col3, col4 = st.columns([0.01, 5])
+                # line divider vertvial
+                with col3:
+                    st.markdown(
+                        """
+                    <div class="divider-vertical-line"></div>
+                        <style>
+                        .divider-vertical-line {
+                            border-left: 2px solid rgba(249, 180, 45, 1.0);
+                            height: 400px;
+                            margin: auto;""",
+                        unsafe_allow_html=True,
+                    )
+
+                with col4:
+
+                    asthma_sever_data = {
+                        "😐Moderate Asthma 😐": [
+                            "Able to talk",
+                            "Heart rate ≤125/minute",
+                            "Respiratory rate ≤30/minute",
+                        ],
+                        "❗Severe Asthma❗": [
+                            "Too breathless to talk",
+                            "Heart rate >125/minute",
+                            "Respiratory rate >30/minute",
+                        ],
+                        "🚨Life-Threatening Asthma🚨": [
+                            "Silent chest",
+                            "Poor respiratory effort",
+                            "Agitation",
+                        ],
+                    }
+
+                    asthma_sever_df = pd.DataFrame(asthma_sever_data)
+
+                    st.dataframe(asthma_sever_df, width=800, hide_index=True)
+
+                    st.info(
+                        "**Knowing a child's asthma severity helps prevent flare-ups outdoors. Those with severe asthma are more vulnerable to triggers like pollution and allergens, making precautions essential.**"
+                    )
+                    st.markdown(
+                        """<p>Source: <a href='https://www.physio-pedia.com/images/0/0b/Screen_Shot_2017-01-25_at_12.53.38_AM.png' target='_blank' >Physiopedia</a> </p>""",
+                        unsafe_allow_html=True,
+                    )
 
     activity_risk_assessment_page()
 except:

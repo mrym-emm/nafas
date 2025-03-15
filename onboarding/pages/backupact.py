@@ -871,93 +871,164 @@ import pandas as pd
 import streamlit as st
 import requests
 
-# Create DataFrame with cities in KL and Selangor
-cities_df = pd.DataFrame(
-    {
-        "city": [
-            # Kuala Lumpur cities/areas
-            "Kuala Lumpur City Center",
-            "Bukit Bintang",
-            "Chow Kit",
-            "Kampung Baru",
-            "Bangsar",
-            "Mont Kiara",
-            "Brickfields",
-            "Sentul",
-            "Wangsa Maju",
-            "Setapak",
-            "Kepong",
-            "Segambut",
-            "Cheras",
-            "Sri Petaling",
-            "Desa Petaling",
-            # Selangor cities
-            "Shah Alam",
-            "Petaling Jaya",
-            "Subang Jaya",
-            "Klang",
-            "Ampang",
-            "Kajang",
-            "Bangi",
-            "Puchong",
-            "Rawang",
-            "Semenyih",
-            "Cyberjaya",
-            "Putrajaya",
-            "Sepang",
-            "Seri Kembangan",
-            "Damansara",
-            "Gombak",
-            "Port Klang",
-            "Sungai Buloh",
-            "Hulu Langat",
-            "Kuala Selangor",
-        ]
-    }
+import urllib.parse  # for url encodiing
+
+st.set_page_config(
+    page_title="Risk Assessment",
+    page_icon="⚽",
+    layout="wide",
+    initial_sidebar_state="auto",
 )
 
+try:
+    # getting current user aqi, pm2.5
+    def get_user_current_info():
+        # citites df
+        cities_df = pd.DataFrame(
+            {
+                "city": [
+                    # kl
+                    "Kuala Lumpur",
+                    "Bukit Bintang",
+                    "Chow Kit",
+                    "Kampung Baru",
+                    "Bangsar",
+                    "Mont Kiara",
+                    "Brickfields",
+                    "Sentul",
+                    "Wangsa Maju",
+                    "Setapak",
+                    "Kepong",
+                    "Segambut",
+                    "Cheras",
+                    "Sri Petaling",
+                    "Desa Petaling",
+                    # slgr
+                    "Shah Alam",
+                    "Petaling Jaya",
+                    "Subang Jaya",
+                    "Klang",
+                    "Ampang",
+                    "Kajang",
+                    "Bangi",
+                    "Puchong",
+                    "Rawang",
+                    "Semenyih",
+                    "Cyberjaya",
+                    "Putrajaya",
+                    "Sepang",
+                    "Seri Kembangan",
+                    "Damansara",
+                    "Gombak",
+                    "Port Klang",
+                    "Sungai Buloh",
+                    "Hulu Langat",
+                    "Kuala Selangor",
+                ]
+            }
+        )
 
-def search_dataframe(searchterm: str) -> list:
-    # Search the DataFrame for the searchterm
-    if not searchterm:
-        return []
+        def search_dataframe(searchterm: str) -> list:
+            # search the city df
+            if not searchterm:
+                return []
 
-    # Case-insensitive search in the city column (changed from title)
-    results = cities_df[cities_df["city"].str.contains(searchterm, case=False)][
-        "city"
-    ].tolist()
-    return results
+            # allwoing case insensitibve
+            results = cities_df[cities_df["city"].str.contains(searchterm, case=False)][
+                "city"
+            ].tolist()
+            return results
 
+        # pass search function to the searchbox
+        selected_value = st_searchbox(
+            search_dataframe,
+            placeholder="Kuala Lumpur",
+            key="df_search",
+        )
 
-# Pass search function to the searchbox
-selected_value = st_searchbox(
-    search_dataframe,
-    placeholder="Search cities in KL and Selangor... ",
-    key="df_search",
-)
+        if selected_value:
+            # selected_city_row = cities_df[cities_df["city"] == selected_value]
 
-st.write(f"Selected value: {selected_value}")
+            # reassinging the selcted value to the city name
+            city_name = selected_value
 
-import requests
-import urllib.parse  # Add this import for URL encoding
+            # encode city name to handle spaces
+            encoded_city = urllib.parse.quote(city_name)
 
-if selected_value:
-    selected_city_row = cities_df[cities_df["city"] == selected_value]
-    st.write("Details:")
-    st.write(selected_city_row)
+            def get_aqi_city(city):
+                geo_url = f"https://nominatim.openstreetmap.org/search?city={city}&country=Malaysia&format=json"
+                response = requests.get(
+                    geo_url, headers={"User-Agent": "ActivityRiskApp"}
+                )
+                data = response.json()
+                lat, long = data[0].get("lat"), data[0].get("lon")
 
-    # Get just the city name as a string, not the DataFrame row
-    city_name = selected_value  # This is already the city name string from st_searchbox
+                aqi_url = f"http://api.waqi.info/feed/geo:{lat};{long}/?token=78d4dab9fd82b3952d79356efc7c1bd46763f540"
 
-    # URL encode the city name to handle spaces properly
-    encoded_city = urllib.parse.quote(city_name)
+                aqi_response = requests.get(aqi_url)
+                aqi_data = aqi_response.json()
 
-    def get_location(city):
-        geo_url = f"https://nominatim.openstreetmap.org/search?city={city}&country=Malaysia&format=json"
-        response = requests.get(geo_url, headers={"User-Agent": "ActivityRiskApp"})
-        data = response.json()
-        return geo_url
+                aqi = aqi_data["data"]["aqi"]
+                pm25 = (
+                    aqi_data["data"]
+                    .get("forecast", {})
+                    .get("daily", {})
+                    .get("pm25", [{}])[0]
+                    .get("avg", "N/A")
+                )
 
-    # Use the encoded city name in the function
-    url = get_location(encoded_city)
-    st.write(f"URL: {url}")
+                return aqi, pm25
+
+            # getting the values
+            aqi, pm25 = get_aqi_city(encoded_city)
+
+            return aqi, pm25
+
+    def activity_risk_assessment_page():
+        st.title("Is it safe for my child to participate in outdoor activities?")
+        st.subheader("Find out now by taking our assessment check on the sidebar!")
+
+        st.divider()
+
+        # Create a placeholder in the main area for content that will appear after button click
+        main_content_placeholder = st.empty()
+
+        with st.sidebar:
+            st.header("⬇️Fill in the below⬇️")
+            st.subheader("Type in your city")
+            aqi, pm25 = get_user_current_info()
+
+            st.divider()
+
+            st.header("Asthma Information")
+            asthma_severity = st.radio(
+                "Asthma Severity Level", ["Mild", "Moderate", "Severe"], index=1
+            )
+            st.divider()
+
+            st.header("Type of Activity")
+            activity_type = st.selectbox(
+                "Categories",
+                ["Light", "Moderate", "Intense"],
+            )
+
+            # Create the button in the sidebar
+            get_recommendation = st.button("Get Recommendations", type="primary")
+
+        # cehck if rec button is presed
+        if get_recommendation:
+            # display belwo in placeholder main page
+            with main_content_placeholder.container():
+                st.header("The verdict?")
+
+                st.write(aqi, pm25)
+                if aqi > 50:
+                    st.write("more thn 50")
+
+        # this is the block to describe the inputs
+        else:
+            st.write("hey")
+
+    activity_risk_assessment_page()
+except:
+    print("")

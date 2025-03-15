@@ -869,6 +869,7 @@
 from streamlit_searchbox import st_searchbox
 import pandas as pd
 import streamlit as st
+import requests
 
 # Create DataFrame with cities in KL and Selangor
 cities_df = pd.DataFrame(
@@ -937,7 +938,26 @@ selected_value = st_searchbox(
 
 st.write(f"Selected value: {selected_value}")
 
+import requests
+import urllib.parse  # Add this import for URL encoding
+
 if selected_value:
-    selected_row = cities_df[cities_df["city"] == selected_value]
+    selected_city_row = cities_df[cities_df["city"] == selected_value]
     st.write("Details:")
-    st.write(selected_row)
+    st.write(selected_city_row)
+
+    # Get just the city name as a string, not the DataFrame row
+    city_name = selected_value  # This is already the city name string from st_searchbox
+
+    # URL encode the city name to handle spaces properly
+    encoded_city = urllib.parse.quote(city_name)
+
+    def get_location(city):
+        geo_url = f"https://nominatim.openstreetmap.org/search?city={city}&country=Malaysia&format=json"
+        response = requests.get(geo_url, headers={"User-Agent": "ActivityRiskApp"})
+        data = response.json()
+        return geo_url
+
+    # Use the encoded city name in the function
+    url = get_location(encoded_city)
+    st.write(f"URL: {url}")

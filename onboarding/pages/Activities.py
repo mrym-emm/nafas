@@ -1,5 +1,6 @@
 import streamlit as st
-from streamlit_geolocation import streamlit_geolocation
+
+# from streamlit_geolocation import streamlit_geolocation
 import requests
 
 # import pandas as pd

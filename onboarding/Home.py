@@ -485,4 +485,4 @@ st.markdown("<b><u>More Links</u></b>", unsafe_allow_html=True)
 # this creates a links
 st.page_link("pages/Learn.py")
 st.page_link("pages/Travel.py")
-st.page_link("pages/Activities.py")
+st.page_link("pages/Assess.py")

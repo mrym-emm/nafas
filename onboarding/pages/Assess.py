@@ -2,6 +2,7 @@ from streamlit_searchbox import st_searchbox
 import pandas as pd
 import streamlit as st
 import requests
+import plotly.graph_objects as go
 
 import urllib.parse  # for url encodiing
 
@@ -49,13 +50,11 @@ try:
                     "Cyberjaya",
                     "Putrajaya",
                     "Sepang",
-                    "Seri Kembangan",
                     "Damansara",
                     "Gombak",
                     "Port Klang",
                     "Sungai Buloh",
                     "Hulu Langat",
-                    "Kuala Selangor",
                     "Kemaman",
                 ]
             }
@@ -75,7 +74,7 @@ try:
         # pass search function to the searchbox
         selected_value = st_searchbox(
             search_dataframe,
-            placeholder="Kuala Lumpur",
+            placeholder="Insert city...",
             key="df_search",
         )
 
@@ -118,12 +117,12 @@ try:
             return aqi, pm25
 
     def activity_risk_assessment_page():
-        st.title("Is it safe for my child to participate in outdoor activities?")
-        st.subheader("Find out now by taking our assessment check on the sidebar!")
+        st.title("Should my child go outside?")
+        st.subheader("Find out now by taking our assessment check in the sidebar!")
 
         st.divider()
 
-        # Create a placeholder in the main area for content that will appear after button click
+        # create a placeholder in the main area for content that will show after rec button iz click
         main_content_placeholder = st.empty()
 
         with st.sidebar:
@@ -141,7 +140,8 @@ try:
             )
             st.divider()
 
-            # Create the button in the sidebar
+            st.write("⬇️Click Me⬇️")
+            #  button in the sidebar
             get_recommendation = st.button("Get Recommendations", type="primary")
 
         # cehck if rec button is presed
@@ -239,7 +239,60 @@ try:
                     st.warning(recommendation)
                 else:
                     st.success(recommendation)
-                st.write(aqi, pm25)
+
+                # display gauge meter of aqi and pm2.5
+                # st.write(aqi, pm25)
+
+                col8, col9 = st.columns(2)
+                with col8:
+
+                    if aqi <= 50:
+                        gauge_color = "green"
+                    elif aqi <= 100:
+                        gauge_color = "yellow"
+                    elif aqi <= 150:
+                        gauge_color = "orange"
+
+                    fig = go.Figure(
+                        go.Indicator(
+                            mode="gauge+number",
+                            value=aqi,
+                            title={"text": "AQI"},
+                            gauge={
+                                "axis": {"range": [0, 100], "tickwidth": 1},
+                                "bar": {"color": gauge_color},
+                            },
+                        )
+                    )
+
+                    # Display the figure in Streamlit
+                    st.plotly_chart(fig, use_container_width=True)
+
+                with col9:
+                    if pm25 <= 12:
+                        gauge_color = "green"
+                    elif pm25 <= 35.5:
+                        gauge_color = "yellow"
+                    elif pm25 <= 55.4:
+                        gauge_color = "orange"
+                    elif pm25 <= 150.4:
+                        gauge_color = "coral"
+
+                    fig = go.Figure(
+                        go.Indicator(
+                            mode="gauge+number",
+                            value=pm25,
+                            title={"text": "PM2.5"},
+                            gauge={
+                                "axis": {"range": [0, 100], "tickwidth": 1},
+                                "bar": {"color": gauge_color},
+                            },
+                        )
+                    )
+
+                    # Display the figure in Streamlit
+                    st.plotly_chart(fig, use_container_width=True)
+                st.divider()
 
         # this is the block to describe the inputs
         else:
@@ -248,7 +301,7 @@ try:
                 st.markdown(
                     """
                     <div style="text-align: center;text-decoration: underline">
-                        <h3>🏙️Why does your city matter?🏙️</h3>
+                        <h5>🏙️Why does your city matter?🏙️</h5>
                     </div>""",
                     unsafe_allow_html=True,
                 )
@@ -314,7 +367,7 @@ try:
                 st.markdown(
                     """
                     <div style="text-align: center;text-decoration: underline">
-                        <h3>😷How sever is your child's asthma?😷</h3>
+                        <h5>😷How sever is your child's asthma?😷</h5>
                     </div>""",
                     unsafe_allow_html=True,
                 )

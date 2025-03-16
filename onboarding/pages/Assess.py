@@ -130,10 +130,10 @@ try:
             st.subheader("Type in your city")
             aqi, pm25 = get_user_current_info()
 
-            st.divider()
+            # st.divider()
 
             st.header("Asthma Information")
-            asthma_severity = st.radio(
+            asthma_severity = st.selectbox(
                 "Asthma Severity Level",
                 ["Moderate", "Severe", "Life Threatening"],
                 index=1,
@@ -141,6 +141,7 @@ try:
             st.divider()
 
             st.write("⬇️Click Me⬇️")
+
             #  button in the sidebar
             get_recommendation = st.button("Get Recommendations", type="primary")
 

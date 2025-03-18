@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import sqlite3
+import os
 
 # page config
 st.set_page_config(
@@ -22,7 +23,10 @@ st.set_page_config(
 #     "/edit?usp=sharing", "/export?format=csv"
 # )
 
-conn = sqlite3.connect("nafas.db")
+
+conn = sqlite3.connect(os.path.abspath("nafas.db"))
+
+# conn = sqlite3.connect("nafas.db")
 
 
 # Function to load data from database
@@ -42,18 +46,18 @@ aqi_df, asthma_df = load_data_from_db()
 st.dataframe(aqi_df)
 
 
-# Title and introduction
-st.title("Insights on Air Quality and Asthma in Malaysia")
-st.markdown(
-    """
-This page provides data insights about the relationship between air quality
-and asthma in Malaysia to help parents better understand and manage asthma triggers.
-"""
-)
+# # Title and introduction
+# st.title("Insights on Air Quality and Asthma in Malaysia")
+# st.markdown(
+#     """
+# This page provides data insights about the relationship between air quality
+# and asthma in Malaysia to help parents better understand and manage asthma triggers.
+# """
+# )
 
-tab1, tab2, tab3 = st.tabs(
-    ["AQI Trends", "Asthma Trends", "🌟Understanding Asthma in Children🌟"]
-)
+# tab1, tab2, tab3 = st.tabs(
+#     ["AQI Trends", "Asthma Trends", "🌟Understanding Asthma in Children🌟"]
+# )
 
 
 # with tab1:

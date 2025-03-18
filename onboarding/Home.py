@@ -412,7 +412,7 @@ if st.session_state.selected_city in station_id_dict:
     for _ in range(1):
         st.write("")
 
-    labels_pollutant = ["PM2.5", "PM10", "O3"]
+    labels_pollutant = ["PM2.5", "PM10", "O\u2083"]
     pollutant_data = [pm25, pm10, o3]
 
     pollutant_df = pd.DataFrame(
@@ -446,7 +446,7 @@ if st.session_state.selected_city in station_id_dict:
                     "**Humidity**",
                     "**PM 2.5 levels**",
                     "**PM 10 levels**",
-                    "**O3 levels**",
+                    "**O\u2083 levels**",
                 ],
                 "Explanation": [
                     "Hot weather can worsen asthma symptoms as higher temperatures can lead to increased respiratory issues. Heat can also increase air pollution levels, triggering asthma attacks in children.",

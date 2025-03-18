@@ -8,18 +8,16 @@ import math
 import os
 import pickle
 
-# from prophet import Prophet
 
-# Page configuration
 st.set_page_config(
-    page_title="NAFAS - Travel",
+    page_title="🚗 Travel",
     page_icon="🍃",
     layout="wide",
     initial_sidebar_state="auto",
 )
 
 
-# Add custom CSS
+# setting styling to card input box
 st.markdown(
     """
 <style>
@@ -30,6 +28,7 @@ st.markdown(
         background-color: rgba(255, 255, 255, 0.1) !important;
         border: 1px solid rgba(255, 255, 255, 0.2) !important;
         border-radius: 8px !important;
+        # color: white !important;
     }
 
     /* Fix for select dropdown */
@@ -171,32 +170,40 @@ st.markdown(
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
     }
 
-    /* No animation for any text */
-    * {
-        animation: none !important;
-        transition: none !important;
-    }
+    # /* No animation for any text */
+    # * {
+    #     animation: none !important;
+    #     transition: none !important;
+    # }
 </style>
 """,
     unsafe_allow_html=True,
 )
 
-# initiailizze sessopm state
+
+# initiailizze sessopm state when not clicked by user
 if "search_submitted" not in st.session_state:
     st.session_state.search_submitted = False
 
-if "origin" not in st.session_state:
-    st.session_state.origin = "Select Location"
+if "selected_origin_state" not in st.session_state:
+    st.session_state.selected_origin_state = "Select State"
 
-if "destination" not in st.session_state:
-    st.session_state.destination = "Select Location"
+if "selected_origin_city" not in st.session_state:
+    st.session_state.selected_origin_city = "Select City"
+
+if "selected_dest_state" not in st.session_state:
+    st.session_state.selected_dest_state = "Select State"
+
+if "selected_dest_city" not in st.session_state:
+    st.session_state.selected_dest_city = "Select City"
 
 # page titel
 st.markdown(
     "<h1 class='page-title'>Travel Route & Air Quality</h1>", unsafe_allow_html=True
 )
 
-# City coordinates database
+# city coordinates database - retrieved here (https://www.longitude-latitude-maps.com/)
+# for demo purpose only seleceted location
 city_coordinates = {
     "Alor Gajah": {
         "lat": 2.3805,
@@ -272,11 +279,11 @@ city_coordinates = {
     },
 }
 
-# Create two column layout
+# create column layout to set input and map
 input_col, map_col = st.columns([1, 2])
 
 
-# Function to create route path between two points - IMPROVED FOR BETTER VISIBILITY
+# fx to create route path between two points
 def create_path_data(origin, destination):
     if origin == "Select Location" or destination == "Select Location":
         return []
@@ -287,54 +294,50 @@ def create_path_data(origin, destination):
     if not origin_data or not dest_data:
         return []
 
-    # Create a more realistic driving path with waypoints
-    # Simulate a realistic route by adding waypoints that follow a route-like path
-
-    # Calculate the direct vector between points
+    # get difference between points
     dx = dest_data["lon"] - origin_data["lon"]
     dy = dest_data["lat"] - origin_data["lat"]
 
-    # Determine general direction and create waypoints accordingly
-    num_waypoints = 6  # Number of intermediate points
+    # determinining general direction and create waypoints
+    num_waypoints = 6  # set number of intermediate points
     waypoints = []
 
-    # Add origin first
+    # add origin first
     waypoints.append({"lat": origin_data["lat"], "lon": origin_data["lon"]})
 
-    # Create intermediate waypoints with road-like patterns
-    # We'll create a jagged path that simulates following actual roads
+    # to make the path look like actual roads. the waypoints give it a jaggedy effect
     for i in range(1, num_waypoints):
-        # Calculate progress along the route (0-1)
+        # calculate progress along the route (0-1)
         progress = i / num_waypoints
 
-        # Base position - direct interpolation
+        # base position - direct interpolation
         base_lat = origin_data["lat"] + dy * progress
         base_lon = origin_data["lon"] + dx * progress
 
-        # Create road-like pattern by adding perpendicular offsets
-        # Alternate between horizontal and vertical segments
-        if i % 2 == 1:  # Horizontal segment
+        # create road-like pattern by adding perpendicular offsets
+
+        if i % 2 == 1:  # horizontal segment
             offset_lat = 0
             offset_lon = (0.1 * math.sin(progress * math.pi)) * (1 - progress)
-        else:  # Vertical segment
+        else:  # vertical segment
             offset_lat = (0.05 * math.sin(progress * math.pi)) * (1 - progress)
             offset_lon = 0
 
         waypoints.append({"lat": base_lat + offset_lat, "lon": base_lon + offset_lon})
 
-    # Add destination
+    # add destination
     waypoints.append({"lat": dest_data["lat"], "lon": dest_data["lon"]})
 
     return waypoints
 
 
-# Malaysia view settings - FLAT MAP (no pitch)
+# malaysia map view
 malaysia_view = pdk.ViewState(
     latitude=3.139,
     longitude=101.6869,
     zoom=8,
-    pitch=0,  # Set to 0 for flat map
-    bearing=0,  # Reset bearing to north
+    pitch=0,  # set to 0 for flat map
+    bearing=0,  # reset bearing to north to show how we typically see map
 )
 
 
@@ -405,19 +408,18 @@ with input_col:
             )
             st.session_state.selected_dest_city = selected_dest_city
 
-    # Now you can safely use these variables
+    # when teh webpage loads theres no city selected so this avoids error temporarily
     if selected_origin_city != "Select City":
-        # Your code that uses selected_origin_city
         pass
 
     # Date selection
     travel_date = st.date_input("Date", datetime.date.today())
 
-    # Journey Details - FIXED DISPLAY WITH DIRECT HTML
+    # journey Details prompt when no destination is selected
     distance_text = "Select starting point and destination to see journey details."
     time_text = ""
 
-    # Only calculate distance if both origin and destination are selected
+    # only calculate distance if both origin and destination are selected
     if (
         selected_origin_city != "Select Location"
         and selected_dest_city != "Select Location"
@@ -427,8 +429,9 @@ with input_col:
         dest_data = city_coordinates.get(selected_dest_city)
 
         if origin_data and dest_data:
-            # Calculate rough distance (in km) using Haversine formula
-            R = 6371  # Earth radius in km
+            # https://www.youtube.com/watch?v=TOTlkKMjQfw - used to calculate distance between 2 points
+            # earth radius in km to used in formula
+            R = 6371
             lat1, lon1 = math.radians(origin_data["lat"]), math.radians(
                 origin_data["lon"]
             )
@@ -444,15 +447,14 @@ with input_col:
             c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
             distance = R * c
 
-            # Estimate travel time (assuming average speed of 60 km/h)
-            travel_time_hours = distance / 60
-            travel_time_minutes = int(travel_time_hours * 60)
+            # display journey details
+            travel_time_hours = distance / 90
+            travel_time_minutes = int(travel_time_hours * 90)
 
-            # Format text
             distance_text = f"Distance: {distance:.1f} km"
             time_text = f"Est. Travel Time: {int(travel_time_hours)} hr {travel_time_minutes % 60} min"
 
-    # Display journey details with consistent CSS
+    # display journey details
     st.markdown(
         f"""
     <div class="journey-details">
@@ -464,16 +466,16 @@ with input_col:
         unsafe_allow_html=True,
     )
 
-    # Submit button
+    # submit button
     if st.button("Check Air Quality"):
         st.session_state.search_submitted = True
 
-# Map area
+# configuring map in its column
 with map_col:
-    # Prepare map data
+    # prepare map data
     map_data = []
 
-    # Always include origin if selected
+    # ensuring origin always included when selected
     if (
         selected_origin_city != "Select Location"
         and selected_origin_city in city_coordinates
@@ -486,11 +488,11 @@ with map_col:
                 "lon": data["lon"],
                 "type": "Origin",
                 "label": "A",  # Add label A for origin
-                "position": [data["lon"], data["lat"]],  # Add position array format
+                "position": [data["lon"], data["lat"]],  # add position array format
             }
         )
 
-    # Always include destination if selected
+    # ensuring destination always included when selected
     if (
         selected_dest_city != "Select Location"
         and selected_dest_city in city_coordinates
@@ -503,12 +505,12 @@ with map_col:
                 "lat": data["lat"],
                 "lon": data["lon"],
                 "type": "Destination",
-                "label": "B",  # Add label B for destination
-                "position": [data["lon"], data["lat"]],  # Add position array format
+                "label": "B",  # add label B for destination
+                "position": [data["lon"], data["lat"]],  # add position array format
             }
         )
 
-    # Create dataframe for city markers
+    # create dataframe for city markers
     locations = (
         pd.DataFrame(map_data)
         if map_data
@@ -517,7 +519,7 @@ with map_col:
         )
     )
 
-    # Create route data if origin and destination are set and are different locations
+    # create route data if origin and destination are set and are different locations
     route_data = []
     if (
         selected_origin_city != "Select Location"
@@ -532,77 +534,76 @@ with map_col:
         else pd.DataFrame(columns=["lat", "lon", "position"])
     )
 
-    # Circle markers for cities - YELLOW COLOR FOR ORIGIN AND DESTINATION (swapped colors)
+    # this is the config for the circle marker
     circle_layer = pdk.Layer(
         "ScatterplotLayer",
         data=locations,
         get_position="position",
-        get_radius=1500,  # Size in meters
-        get_fill_color=[231, 205, 120, 220],  # Yellow color (from AB labels)
+        get_radius=1500,  # size
+        get_fill_color=[231, 205, 120, 220],  # color
         pickable=True,
         auto_highlight=True,
         stroked=True,
         get_line_color=[255, 255, 255],
-        get_line_width=500,  # Add white border width
+        get_line_width=500,  # add border width fpr better visibility
         radius_scale=1,
         radius_min_pixels=5,
         radius_max_pixels=100,
     )
 
-    # Text layer for A and B labels - ORANGE-RED COLOR with Title font style
+    # text layer for A(start) and B (end) font
     text_layer = pdk.Layer(
         "TextLayer",
         data=locations,
         get_position="position",
-        get_text="label",  # Use "A" and "B" labels
-        get_size=20,  # Increase font size to be larger than city names
-        get_color=[255, 87, 34, 255],  # Orange-Red color (from circle markers)
+        get_text="label",  # use "A" and "B" labels
+        get_color=[255, 87, 34, 255],  # color for label
         get_angle=0,
         get_text_anchor="middle",
         get_alignment_baseline="center",
-        get_pixel_offset=[0, -13],  # Text above circle markers
+        get_pixel_offset=[0, -13],
         billboard=True,
         size_scale=1,
-        size_min_pixels=5,  # Ensure visible at any zoom level
-        size_max_pixels=70,  # Limit maximum size but keep large
+        size_min_pixels=5,
+        size_max_pixels=70,
     )
 
-    # Initialize layers list
+    # initialize layers list to order layer
     layers = []
 
-    # Add route line between origin and destination if both are selected - IMPROVED DRIVING ROUTE
+    # add route line between origin and destination only when both are selected
     if (
         selected_origin_city != "Select Location"
         and selected_dest_city != "Select Location"
         and selected_origin_city != selected_dest_city
     ):
-        # Get waypoints for a more realistic driving route
+        # get waypoints for a more realistic driving route
         waypoints = create_path_data(selected_origin_city, selected_dest_city)
 
         if len(waypoints) >= 2:
-            # Convert waypoints to a path format suitable for PathLayer
+            # convert waypoints to a path format
             path_data = []
             for i in range(len(waypoints) - 1):
-                # We create segments for each pair of waypoints
+                # create segments for each pair of waypoints
                 path_data.append(
                     {
                         "path": [
                             [waypoints[i]["lon"], waypoints[i]["lat"]],
                             [waypoints[i + 1]["lon"], waypoints[i + 1]["lat"]],
                         ],
-                        "color": [255, 152, 0],  # Orange color for route
+                        "color": [255, 152, 0],  # color for route
                     }
                 )
 
-            # Create a realistic looking car route with PathLayer
+            # create route path
             route_layer = pdk.Layer(
                 "PathLayer",
                 data=path_data,
                 get_path="path",
                 get_color="color",
-                get_width=300,  # Width in meters
-                width_min_pixels=4,  # Minimum width for visibility
-                width_max_pixels=8,  # Maximum width
+                get_width=300,
+                width_min_pixels=4,
+                width_max_pixels=8,
                 rounded=True,
                 joint_rounded=True,
                 cap_rounded=True,
@@ -611,16 +612,14 @@ with map_col:
                 pickable=False,
             )
 
-            # Add route layer to the map
+            # add route layer to the map
             layers.append(route_layer)
 
-    # Add all layers in correct order (route at bottom, then markers, then text)
+    # addomg all layers in correct order (route at bottom ->markers -> text)
     layers.append(circle_layer)
-    layers.append(
-        text_layer
-    )  # Only keep the text layer, remove the white border effect
+    layers.append(text_layer)
 
-    # Create tooltip with no animation
+    # create tooltip
     tooltip = {
         "html": """
         <div style="padding: 12px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.5);">
@@ -639,11 +638,11 @@ with map_col:
         },
     }
 
-    # Display city count only if there are markers (no flying text)
+    # display city count only if there are markers
     if not locations.empty:
         st.write(f"Displaying {len(map_data)} locations on map")
 
-    # Render map with flat view
+    # render map with flat view
     st.pydeck_chart(
         pdk.Deck(
             map_style="mapbox://styles/mapbox/dark-v10",
@@ -653,7 +652,7 @@ with map_col:
         )
     )
 
-    # Map instructions (no animation)
+    # map instructions (for user to navigate map)
     st.markdown(
         """
     <div style="background-color: rgba(255, 255, 255, 0.1); padding: 10px; border-radius: 8px; font-size: 0.8em; margin-top: 10px;">
@@ -665,23 +664,22 @@ with map_col:
 
 # forecast result panel (only displayed after submitting search)
 if st.session_state.search_submitted:
-    # Get destination name
+    # get user destination name
     dest_name = st.session_state.get("selected_dest_city", "Select City")
     if dest_name == "Select City":
         st.error("Please select a specific city before checking air quality")
         st.session_state.search_submitted = False
         st.stop()
 
-    # AQI score section
-    # Load the model
+    # caching for speed
     @st.cache_resource
     def load_model(dest):
         try:
-            # Get the current directory and parent directory
+            # get the current directory and parent directory
             current_dir = os.path.dirname(os.path.abspath(__file__))
             parent_dir = os.path.dirname(current_dir)
 
-            # Mapping cities to their respective states
+            # mapping cities to their states
             city_to_state = {
                 "alorgajah": "melaka",
                 "bukitjalil": "kuala_lumpur",
@@ -703,44 +701,38 @@ if st.session_state.search_submitted:
                 "temerloh": "pahang",
             }
 
-            # Standardize the city name (remove spaces)
+            # remove spaces in city name (to locate file later)
             dest_city = dest.lower().strip().replace(" ", "")
 
-            # Retrieve state name from dictionary
+            # retrieve state name in city_to_state dictionary
             if dest_city not in city_to_state:
                 raise ValueError(f"City '{dest_city}' not found in dataset mapping.")
 
             dest_state = city_to_state[dest_city]
 
-            # Dynamically generate the correct model filename
+            # generate the correct model filename based on the desttination
             model_filename = f"prophet_model_{dest_city}_{dest_state}.pkl"
 
-            # Define possible paths using absolute path references
+            # to avoid error when location directory when deploying, list all path files
             possible_paths_aqi = [
-                os.path.join(current_dir, model_filename),  # Current directory
-                os.path.join(
-                    current_dir, "All_States", model_filename
-                ),  # All_States in current directory
-                os.path.join(parent_dir, model_filename),  # Parent directory
-                os.path.join(
-                    parent_dir, "All_States", model_filename
-                ),  # All_States in parent directory
+                # current dir
+                os.path.join(current_dir, model_filename),
+                # All_States fodler in current dir
+                os.path.join(current_dir, "All_States", model_filename),
+                # parent directory
+                os.path.join(parent_dir, model_filename),
+                # All_States in parent directory
+                os.path.join(parent_dir, "All_States", model_filename),
             ]
 
-            # # Debug information
-            # st.write(f"Current directory: {current_dir}")
-            # st.write(f"Parent directory: {parent_dir}")
-            # st.write(f"Looking for model: {model_filename}")
-            # st.write(f"Checking these paths: {possible_paths_aqi}")
-
-            # Attempt to find and load the model
+            # find and load model
             for path in possible_paths_aqi:
                 if os.path.exists(path):
                     # st.write(f"Found model at: {path}")
                     with open(path, "rb") as file:
                         return pickle.load(file)
 
-            # Raise an error if no model file is found
+            # error exception
             raise FileNotFoundError(
                 f"Couldn't find model file in any of the tried paths: {possible_paths_aqi}"
             )
@@ -749,28 +741,29 @@ if st.session_state.search_submitted:
             st.error(f"Error loading model: {e}")
             return None
 
-    # Simulated data - This will come from your ML model
+    # data from pickled mode
     dest = dest_name.replace(" ", "").lower().strip()
+    # load pickled model
     model_aqi = load_model(dest)
     if model_aqi is None:
         st.error(f"Failed to load model of {dest_name}. Please check the model file.")
         st.stop()
 
-    # Ensure target_date is in datetime format
+    # ensuring target is within the date frame
     target_date = pd.to_datetime(travel_date)
     last_date = model_aqi.history["ds"].max()
     days_needed = (target_date - last_date).days + 1
-    # Display model info
+    # display mdel info for user convenince
     st.markdown('<div class="forecast-panel">', unsafe_allow_html=True)
     st.info(
         f"Model loaded successfully. Historical data up to: {last_date.strftime('%Y-%m-%d')}"
     )
 
-    # Create future dataframe
+    # dataframe to store predcition (prophet functinoality)
     future_aqi = model_aqi.make_future_dataframe(periods=days_needed, freq="D")
     print(future_aqi.columns)
 
-    # Predict AQI
+    # predict aqi
     forecast_aqi = model_aqi.predict(future_aqi)
     target_aqi = forecast_aqi[forecast_aqi["ds"] == target_date]
 
@@ -778,14 +771,12 @@ if st.session_state.search_submitted:
         st.error(f"Could not find forecast for {target_date.date()}.")
         st.stop()
 
-    # Extract AQI predictions
+    # retrieve AQI predictions
     predicted_aqi = target_aqi["yhat"].values[0]
-    lower_bound_aqi = target_aqi["yhat_lower"].values[0]
-    upper_bound_aqi = target_aqi["yhat_upper"].values[0]
 
     aqi_value = round(predicted_aqi, 0)
 
-    # Determine AQI level and risk level
+    # aqi and its risk level
     if aqi_value <= 50:
         aqi_class = "aqi-good"
         risk_level = "Low"
@@ -800,13 +791,12 @@ if st.session_state.search_submitted:
         risk_text = "Air quality is poor, consider reducing outdoor activities."
 
     # st.markdown('<div class="forecast-panel">', unsafe_allow_html=True)
-    # Add brown title container with adjusted margin and centered text
     st.markdown(
         f'<div class="title-container" style="margin-top: 70px; margin-left: auto; margin-right: auto;"><h1 class="page-title" style="color: white;">Air Quality Forecast in {dest_name}</h1></div>',
         unsafe_allow_html=True,
     )
 
-    # Create columns layout for AQI indicator and forecast information
+    # column to arrange for aqi and forecast
     col1, col2, col3 = st.columns([1, 1, 1])
 
     with col2:
@@ -823,23 +813,21 @@ if st.session_state.search_submitted:
             unsafe_allow_html=True,
         )
 
-    # Generate 5-day forecast dynamically
+    # from user input, set it up for the next 5 days
     future_dates = [travel_date + timedelta(days=i) for i in range(5)]
     future_df = pd.DataFrame({"ds": future_dates})
 
-    # Predict AQI for the next 5 days using the Prophet model
+    # use model to predict the future daytes
     forecast_aqi = model_aqi.predict(future_df)
 
-    # Extract AQI predictions for the next 5 days
+    # extract AQI predictions for the next 5 days
     aqi_values = forecast_aqi["yhat"].round(0).astype(int).tolist()
-    aqi_lower = forecast_aqi["yhat_lower"].round(0).astype(int).tolist()
-    aqi_upper = forecast_aqi["yhat_upper"].round(0).astype(int).tolist()
 
-    # Generate formatted dates for display
+    # format dates for display
     dates = [date.strftime("%m/%d") for date in future_dates]
     day_names = [date.strftime("%a") for date in future_dates]
 
-    # Create forecast timeline in Streamlit
+    # create forecast timeline
     st.markdown(
         "<h3 style='text-align: center; margin: 30px 0 20px 0;'>5-Day Forecast</h3>",
         unsafe_allow_html=True,
@@ -848,13 +836,13 @@ if st.session_state.search_submitted:
     forecast_cols = st.columns(5)
 
     for i in range(5):
-        # Determine AQI level color dynamically
+        # colro for each aqi level
         if aqi_values[i] <= 50:
-            aqi_color = "#8BC34A"  # Green - Good
+            aqi_color = "#8BC34A"  # green is good
         elif aqi_values[i] < 100:
-            aqi_color = "#FFC107"  # Yellow - Moderate
+            aqi_color = "#FFC107"  # yellow-moderate
         else:
-            aqi_color = "#FF5722"  # Red - Unhealthy
+            aqi_color = "#FF5722"  # red unhealthy
 
         with forecast_cols[i]:
             st.markdown(
@@ -867,8 +855,11 @@ if st.session_state.search_submitted:
                     margin: 10px auto; font-weight: bold;">
                     {aqi_values[i]}
                 </div>
-                <p style="font-size: 12px; margin-top: 5px;">(± {abs(aqi_upper[i] - aqi_lower[i])})</p>
+                
             </div>
             """,
                 unsafe_allow_html=True,
             )
+    for _ in range(2):
+        st.write("")
+    st.info("Disclaimer: These are simply predictions and for planning purposes.")

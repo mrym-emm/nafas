@@ -11,7 +11,7 @@ st.set_page_config(
 )
 
 
-## for on github
+## to load css file for home screen animation
 current_dir = os.path.dirname(os.path.abspath(__file__))
 css_path = os.path.join(current_dir, "styles_landing.css")
 
@@ -19,15 +19,6 @@ with open(css_path, "r") as f:
     css = f.read()
     st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
 
-
-# # Load CSS
-# def load_css():
-#     with open("styles_landing.css", "r") as f:
-#         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-
-
-# # apply css
-# load_css()
 
 # landing page
 st.markdown(
@@ -50,7 +41,7 @@ time.sleep(5)
 # the api token to retireve real time data
 API_TOKEN = "78d4dab9fd82b3952d79356efc7c1bd46763f540"
 
-# all available station ids
+# all available station ids, hardcoded, retrieved from aqicn website
 station_id_dict = {
     "Pengerang": 9495,
     "Kota Tinggi": 2577,
@@ -118,7 +109,7 @@ def get_aqi_data(station_id):
     if response.status_code == 200:
         data = response.json()
         if data.get("status") == "ok":
-            # Extract the basic data
+            # extract the aqi, temp and humidity data
             aqi = data["data"]["aqi"]
             temperature = data["data"].get("iaqi", {}).get("t", {}).get("v", "N/A")
             humidity = data["data"].get("iaqi", {}).get("h", {}).get("v", "N/A")
@@ -167,7 +158,7 @@ def get_aqi_color(aqi):
         else:
             return "#7E0023"  # marron - Hazardous
     except (ValueError, TypeError):
-        return "#E7CD78"  # Default color if AQI is not a valid number
+        return "#E7CD78"  # will return default card color(gold) if aqi is NA/cant be retirevd
 
 
 # all states and city data to correspond to aqi
@@ -314,7 +305,7 @@ div.stButton {
     unsafe_allow_html=True,
 )
 
-
+# creating columns to placed the button/cards so it looks organized
 row1_cols = st.columns(6)
 
 for i, state in enumerate(states[:6]):
@@ -326,11 +317,12 @@ for i, state in enumerate(states[:6]):
 row2_cols = st.columns(6)
 for i, state in enumerate(states[6:]):
     with row2_cols[i]:
-        if st.button(state, key=f"btn_{state}"):  # unique key for second row
+        # unique key for second row
+        if st.button(state, key=f"btn_{state}"):
             st.session_state.selected_state = state
 
 
-# if user select state, then show city
+# if user select state, then show city in tht state via selectbox
 if st.session_state.selected_state:
     state_cities = cities.get(st.session_state.selected_state, [])
     st.session_state.selected_city = st.selectbox(
@@ -369,6 +361,7 @@ if st.session_state.selected_city in station_id_dict:
         </div>
     """
 
+    # for simplicity, will only do warnings for 2 levels of aqi since thtat more common in malaysia
     if int(aqi) <= 49:
         for _ in range(2):
             st.write(" ")
@@ -406,6 +399,7 @@ if st.session_state.selected_city in station_id_dict:
         </div>
     """
 
+    # show cards for the temp, aqi and humidity
     with col1:
         st.markdown(card_style.format("🌤️ (°C)", temperature), unsafe_allow_html=True)
 
@@ -474,6 +468,7 @@ if st.session_state.selected_city in station_id_dict:
 
 
 else:
+    # if user doesnt inser location will show this
     st.info("Please find your location!")
 
 st.divider()

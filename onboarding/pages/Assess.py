@@ -127,7 +127,7 @@ try:
 
         with st.sidebar:
             st.header("⬇️Fill in the below⬇️")
-            st.subheader("Type in your city")
+            st.subheader("Please enter city")
             aqi, pm25 = get_user_current_info()
 
             # st.divider()

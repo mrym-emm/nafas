@@ -8,6 +8,7 @@ import math
 import os
 import pickle
 
+# from prophet import Prophet
 
 # Page configuration
 st.set_page_config(
@@ -718,7 +719,17 @@ if st.session_state.search_submitted:
                 f"{model_filename}",
                 f"./{model_filename}",
                 f"../{model_filename}",
+                f"./All_States/{model_filename}",  # Note the ./ prefix
+                f"../All_States/{model_filename}",  # Look up one directory
                 f"All_States/{model_filename}",
+                os.path.join(
+                    os.path.dirname(__file__), "All_States", model_filename
+                ),  # More robust path
+                os.path.join(
+                    os.path.dirname(os.path.abspath(__file__)),
+                    "All_States",
+                    model_filename,
+                ),  # Absolute path
             ]
 
             # Attempt to find and load the model

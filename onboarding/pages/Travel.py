@@ -728,11 +728,11 @@ if st.session_state.search_submitted:
                 ),  # All_States in parent directory
             ]
 
-            # Debug information
-            st.write(f"Current directory: {current_dir}")
-            st.write(f"Parent directory: {parent_dir}")
-            st.write(f"Looking for model: {model_filename}")
-            st.write(f"Checking these paths: {possible_paths_aqi}")
+            # # Debug information
+            # st.write(f"Current directory: {current_dir}")
+            # st.write(f"Parent directory: {parent_dir}")
+            # st.write(f"Looking for model: {model_filename}")
+            # st.write(f"Checking these paths: {possible_paths_aqi}")
 
             # Attempt to find and load the model
             for path in possible_paths_aqi:

@@ -24,8 +24,13 @@ st.set_page_config(
 # )
 
 
-conn = sqlite3.connect(os.path.abspath("nafas.db"))
 
+# Get the current directory of the script
+current_dir = os.path.dirname(os.path.abspath(__file__))
+# Go up one level to the parent directory if your script is in a subdirectory
+parent_dir = os.path.dirname(current_dir)
+# Connect to the database using the full path
+conn = sqlite3.connect(os.path.join(parent_dir, "nafas.db"))
 # conn = sqlite3.connect("nafas.db")
 
 
@@ -44,7 +49,6 @@ def load_data_from_db():
 aqi_df, asthma_df = load_data_from_db()
 
 st.dataframe(aqi_df)
-
 
 # # Title and introduction
 # st.title("Insights on Air Quality and Asthma in Malaysia")

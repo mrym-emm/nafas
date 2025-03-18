@@ -7,7 +7,7 @@ import numpy as np
 import math
 import os
 import pickle
-from prophet import Prophet
+
 
 # Page configuration
 st.set_page_config(

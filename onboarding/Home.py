@@ -462,7 +462,7 @@ if st.session_state.selected_city in station_id_dict:
         st.table(info_df)
 
         st.markdown(
-            "The above information is <a href='https://www.researchgate.net/figure/Air-quality-index-AQI-values-PM25-and-PM10-conc-color-codes-air-pollutant-level-of_tbl1_343404673' target='_self'>sourced.</a>",
+            "The above information is <a href='https://www.researchgate.net/publication/343404673/figure/tbl1/AS:920630392287232@1596506798348/Air-quality-index-AQI-values-PM25-and-PM10-conc-color-codes-air-pollutant-level-of.png' target='_self'>sourced.</a>",
             unsafe_allow_html=True,
         )
 

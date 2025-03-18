@@ -737,7 +737,7 @@ if st.session_state.search_submitted:
             # Attempt to find and load the model
             for path in possible_paths_aqi:
                 if os.path.exists(path):
-                    st.write(f"Found model at: {path}")
+                    # st.write(f"Found model at: {path}")
                     with open(path, "rb") as file:
                         return pickle.load(file)
 

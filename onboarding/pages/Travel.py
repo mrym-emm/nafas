@@ -678,6 +678,10 @@ if st.session_state.search_submitted:
     @st.cache_resource
     def load_model(dest):
         try:
+            # Get the current directory and parent directory
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            parent_dir = os.path.dirname(current_dir)
+
             # Mapping cities to their respective states
             city_to_state = {
                 "alorgajah": "melaka",
@@ -700,10 +704,8 @@ if st.session_state.search_submitted:
                 "temerloh": "pahang",
             }
 
-            # Standardize the city name (REPLACE spaces with underscores)
-            dest_city = (
-                dest.lower().strip().replace(" ", "_")
-            )  # <--- Fixed transformation!
+            # Standardize the city name (remove spaces)
+            dest_city = dest.lower().strip().replace(" ", "")
 
             # Retrieve state name from dictionary
             if dest_city not in city_to_state:
@@ -714,27 +716,28 @@ if st.session_state.search_submitted:
             # Dynamically generate the correct model filename
             model_filename = f"prophet_model_{dest_city}_{dest_state}.pkl"
 
-            # Define possible paths to search for the model file
+            # Define possible paths using absolute path references
             possible_paths_aqi = [
-                f"{model_filename}",
-                f"./{model_filename}",
-                f"../{model_filename}",
-                f"./All_States/{model_filename}",  # Note the ./ prefix
-                f"../All_States/{model_filename}",  # Look up one directory
-                f"All_States/{model_filename}",
+                os.path.join(current_dir, model_filename),  # Current directory
                 os.path.join(
-                    os.path.dirname(__file__), "All_States", model_filename
-                ),  # More robust path
+                    current_dir, "All_States", model_filename
+                ),  # All_States in current directory
+                os.path.join(parent_dir, model_filename),  # Parent directory
                 os.path.join(
-                    os.path.dirname(os.path.abspath(__file__)),
-                    "All_States",
-                    model_filename,
-                ),  # Absolute path
+                    parent_dir, "All_States", model_filename
+                ),  # All_States in parent directory
             ]
+
+            # Debug information
+            st.write(f"Current directory: {current_dir}")
+            st.write(f"Parent directory: {parent_dir}")
+            st.write(f"Looking for model: {model_filename}")
+            st.write(f"Checking these paths: {possible_paths_aqi}")
 
             # Attempt to find and load the model
             for path in possible_paths_aqi:
                 if os.path.exists(path):
+                    st.write(f"Found model at: {path}")
                     with open(path, "rb") as file:
                         return pickle.load(file)
 

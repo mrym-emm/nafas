@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import sqlite3
+import os
 
 # page config
 st.set_page_config(
@@ -11,15 +13,31 @@ st.set_page_config(
     initial_sidebar_state="auto",
 )
 
-# connecting to google sheet api for aqi state
-aqi_sheet_url = "https://docs.google.com/spreadsheets/d/1c43XS6gjrZQdlMf7a32JsSZzdrLc7MitWCAA6NTXeBs/edit?usp=sharing"
-csv_export_url_aqi = aqi_sheet_url.replace("/edit?usp=sharing", "/export?format=csv")
 
-# connecting to google sheet api for asthma
-asthma_sheet_url = "https://docs.google.com/spreadsheets/d/1MFEz402SYOU21KqPmVFfJggmiNFSat4VcCr7vG-kflQ/edit?usp=sharing"
-csv_export_url_asthma = asthma_sheet_url.replace(
-    "/edit?usp=sharing", "/export?format=csv"
-)
+# getting directory of database file
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+parent_dir = os.path.dirname(current_dir)
+# connect to the database using the full path
+conn = sqlite3.connect(os.path.join(parent_dir, "nafas.db"))
+
+
+# fx to load data from database
+def load_data_from_db():
+    # load aqi data
+    aqi_data = pd.read_sql_query("SELECT * FROM aqi_yearly_state", conn)
+
+    # load asthma data
+    asthma_data = pd.read_sql_query("SELECT * FROM prevalence_incidence_asthma", conn)
+
+    return aqi_data, asthma_data
+
+
+# load data from db file into dataframe
+aqi_df, asthma_df = load_data_from_db()
+
+# st.dataframe(aqi_df)
+# st.dataframe(asthma_df)
 
 
 # Title and introduction
@@ -57,65 +75,72 @@ with tab1:
         unsafe_allow_html=True,
     )
 
-    # caches the data to improve performance
     @st.cache_data
-    def load_data(url):
-        return pd.read_csv(url)
+    def get_aqi_data():
+        return aqi_df
 
+    # handling error if databse cant be accessed
     try:
-        data = load_data(csv_export_url_aqi)
-        # st.dataframe(data)
+        data = get_aqi_data()
     except Exception as e:
         st.error(f"Error loading data: {e}")
         st.info("Please ensure database can be accessed")
+        data = None
 
     if data is not None:
-        # ensure the Year column is treated as an integer
-        data["Year"] = data["Year"].astype(int)
+        # convert year to integer
+        data["year"] = data["year"].astype(int)
 
-        # user can select state
+        # lsi tof unique states
+        states = data["state"].unique().tolist()
+
+        # default states to be shown to guide users
+        default_states = (
+            ["Kuala Lumpur", "Selangor"]
+            if all(state in states for state in ["Kuala Lumpur", "Selangor"])
+            else states[:2]
+        )
+
+        # allow multiple states to eb selected
         selected_states = st.multiselect(
             "Select states to display👇",
-            options=data.columns[1:],
-            default=["Kuala Lumpur", "Selangor"],
+            options=states,
+            default=default_states,
         )
 
-        # converting wide to long format using melt
-        df_melted = data.melt(
-            id_vars=["Year"],
-            value_vars=selected_states,
-            var_name="State",
-            value_name="AQI",
-        )
+        if selected_states:
+            # filter data according to user selection
+            filtered_data = data[data["state"].isin(selected_states)]
 
-        # kreate hte line chart
-        fig = px.line(
-            df_melted,
-            x="Year",
-            y="AQI",
-            color="State",
-            markers=True,
-            title="Air Quality Index (AQI) Trends From 2005 - 2022",
-            labels={"AQI": "AQI Value", "Year": "Year", "State": "State"},
-        )
+            # creating line chart using plotly
+            fig = px.line(
+                filtered_data,
+                x="year",
+                y="aqi",
+                color="state",
+                markers=True,
+                title="Air Quality Index (AQI) Trends From 2005 - 2022",
+                labels={"aqi": "AQI Value", "year": "Year", "state": "State"},
+            )
 
-        st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, use_container_width=True)
 
-        st.markdown(
-            """
-            Air quality has gone up and down over the years, with all states experiencing similar patterns - like when everyone's air quality worsened dramatically in 2019, likely during the <a href='https://en.wikipedia.org/wiki/2019_Southeast_Asian_haze' target='_self'>2019 ASEAN Haze</a>. There was also a notable improvement period around 2017-2018. 
-            """,
-            unsafe_allow_html=True,
-        )
+            # insights
+            st.markdown(
+                """
+                Air quality has gone up and down over the years, with all states experiencing similar patterns - like when everyone's air quality worsened dramatically in 2019, likely during the <a href='https://en.wikipedia.org/wiki/2019_Southeast_Asian_haze' target='_self'>2019 ASEAN Haze</a>. There was also a notable improvement period around 2017-2018.
+                """,
+                unsafe_allow_html=True,
+            )
 
-        st.markdown(
-            """
-            As of 2022, air quality has somewhat stabilized but remains worse than the healthier levels seen in 2017. Parents should expect this trend to worsen as industrialization continues across Malaysia, with more vehicles and factories contributing to pollution. Please visit the `🌟Understanding Asthma in Children🌟` section of this page.
-            """,
-            unsafe_allow_html=True,
-        )
-    else:
-        st.warning("Data not available.")
+            st.markdown(
+                """
+                As of 2022, air quality has somewhat stabilized but remains worse than the healthier levels seen in 2017. Parents should expect this trend to worsen as industrialization continues across Malaysia, with more vehicles and factories contributing to pollution. Please visit the `🌟Understanding Asthma in Children🌟` section of this page.
+                """,
+                unsafe_allow_html=True,
+            )
+        else:
+            st.warning("Please select at least one state to display data")
 
     st.divider()
 
@@ -132,51 +157,64 @@ with tab2:
     # add expander
     with st.expander("➡️ Prevalence of Asthma in Children in Malaysia `(Gender)`"):
         try:
-            data_asthma = load_data(csv_export_url_asthma)
-            # st.dataframe(data_asthma)
 
-            # group by gender
-            gender_yearly = (
-                data_asthma.groupby(["year", "sex_name"])["val"].mean().reset_index()
-            )
+            @st.cache_data
+            def get_ashtma_data():
+                return asthma_df
 
-            # grouped bar chart
-            fig_gender = px.bar(
-                gender_yearly,
-                x="year",
-                y="val",
-                color="sex_name",
-                barmode="group",
-                title="Asthma Prevalence by Gender and Year (2005 - 2021)",
-                labels={"year": "Year", "val": "Prevalence", "sex_name": "Gender"},
-                color_discrete_map={"Male": "#2D7087", "Female": "#CF8282"},
-            )
+            try:
+                data = get_ashtma_data()
+            except Exception as e:
+                st.error(f"Error loading data: {e}")
+                st.info("Please ensure database can be accessed")
+                data = None
 
-            # Customize the layout
-            fig_gender.update_layout(
-                xaxis=dict(tickmode="linear"),
-                legend_title="Gender",
-                yaxis_title="Prevalence Value",
-                plot_bgcolor="rgba(0,0,0,0)",
-                height=500,
-            )
+            if data is not None:
+                # Convert year column to integer if it's not already
+                data["year"] = data["year"].astype(int)
 
-            # show plot
-            st.plotly_chart(fig_gender, use_container_width=True)
+                # Group by gender
+                gender_yearly = (
+                    data.groupby(["year", "sex_name"])["val"].mean().reset_index()
+                )
 
-            st.markdown(
-                """
-                This graph shows childhood asthma cases in Malaysia by gender from 2005-2021. <span style="color: #0EC9FF;">Male</span> children consistently have higher rates than <span style="color: #FF10F0;">females</span>. Both genders saw peak cases around 2009-2010, followed by a gradual decline.
-                """,
-                unsafe_allow_html=True,
-            )
+                # Grouped bar chart
+                fig_gender = px.bar(
+                    gender_yearly,
+                    x="year",
+                    y="val",
+                    color="sex_name",
+                    barmode="group",
+                    title="Asthma Prevalence by Gender and Year (2005 - 2021)",
+                    labels={"year": "Year", "val": "Prevalence", "sex_name": "Gender"},
+                    color_discrete_map={"Male": "#2D7087", "Female": "#CF8282"},
+                )
 
-            st.markdown(
-                """
-                Interestingly enough, there is a <a href='https://allergyasthmanetwork.org/news/the-asthma-gender-gap/' target='_blank' style="text-decoration: none">study</a> where it was observed that <span style="color: #0EC9FF;">males</span> under 18 are more likely to have asthma in comparison to <span style="color: #FF10F0;">female</span> children. Asthma mortality is also <a href='https://allergyasthmanetwork.org/news/the-asthma-gender-gap/' target='_blank' style="text-decoration: none">more common</a> in this gender group. This is due to the fact that <span style="color: #0EC9FF;">males</span> under 10 have <a href='https://pmc.ncbi.nlm.nih.gov/articles/PMC8783601/#:~:text=There%20is%20a%20clear%20sex,)%20%5B1%2C%202%5D.' target='_blank' style="text-decoration: none">smaller airways</a> compared to <span style="color: #FF10F0;">females</span>.
-                """,
-                unsafe_allow_html=True,
-            )
+                # Customize the layout
+                fig_gender.update_layout(
+                    xaxis=dict(tickmode="linear"),
+                    legend_title="Gender",
+                    yaxis_title="Prevalence Value",
+                    plot_bgcolor="rgba(0,0,0,0)",
+                    height=500,
+                )
+
+                # show plot
+                st.plotly_chart(fig_gender, use_container_width=True)
+
+                st.markdown(
+                    """
+                    This graph shows childhood asthma cases in Malaysia by gender from 2005-2021. <span style="color: #0EC9FF;">Male</span> children consistently have higher rates than <span style="color: #FF10F0;">females</span>. Both genders saw peak cases around 2009-2010, followed by a gradual decline.
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+                st.markdown(
+                    """
+                    Interestingly enough, there is a <a href='https://allergyasthmanetwork.org/news/the-asthma-gender-gap/' target='_blank' style="text-decoration: none">study</a> where it was observed that <span style="color: #0EC9FF;">males</span> under 18 are more likely to have asthma in comparison to <span style="color: #FF10F0;">female</span> children. Asthma mortality is also <a href='https://allergyasthmanetwork.org/news/the-asthma-gender-gap/' target='_blank' style="text-decoration: none">more common</a> in this gender group. This is due to the fact that <span style="color: #0EC9FF;">males</span> under 10 have <a href='https://pmc.ncbi.nlm.nih.gov/articles/PMC8783601/#:~:text=There%20is%20a%20clear%20sex,)%20%5B1%2C%202%5D.' target='_blank' style="text-decoration: none">smaller airways</a> compared to <span style="color: #FF10F0;">females</span>.
+                    """,
+                    unsafe_allow_html=True,
+                )
 
         except Exception as e:
             st.error(f"Error loading data: {e}")
@@ -186,7 +224,7 @@ with tab2:
         try:
 
             # since ps is about 6-17, will filter out below 5
-            filtered_data = data_asthma[data_asthma["age_name"] != "<5 years"]
+            filtered_data = data[data["age_name"] != "<5 years"]
 
             # group by year
             age_yearly = (
@@ -220,10 +258,10 @@ with tab2:
             st.markdown(
                 """
                 This graph shows childhood asthma prevalence in Malaysia by age group from 2005-2021. Children aged 10-19 years consistently show higher rates than the 5-9 age group. Both groups experienced peak prevalence around 2009-2010, followed by a gradual decline through 2021.
-                
+
                 It's worth noting that while the 5-9 age group shows lower prevalence, this may be partly due to the narrower age range `(5 years)` compared to the 10-19 group `(10 years)`. Despite this difference in age span, the pattern of higher rates in older children remains significant.
-                
-        
+
+
                 """,
                 unsafe_allow_html=True,
             )
@@ -263,7 +301,7 @@ with tab3:
 
         st.markdown(
             """
-            To get an idea of how asthma feels for your child, try breathing in and out through a straw 🥤. 
+            To get an idea of how asthma feels for your child, try breathing in and out through a straw 🥤.
                 <ul>
                 <li>First do it normally</li>
                 <li>Then pinch the straws end</li>
@@ -334,7 +372,7 @@ with tab3:
             `Have an Action Plan`<br>
             An asthma action plan guides medication use based on symptom changes, from mild flare-ups to emergencies. Your doctor fills it out and updates it yearly or when medications change. Ensure you & your child understand it.
 
-            
+
             """,
                 unsafe_allow_html=True,
             )
@@ -361,7 +399,7 @@ with tab3:
             `Have a Symptom Diary`<br>
             The symptom diary helps track asthma patterns, identify triggers, and assess medication effectiveness. It’s especially useful after diagnosis, medication changes, or symptom shifts. Over time, your child can manage it independently.
 
-            
+
             """,
                 unsafe_allow_html=True,
             )

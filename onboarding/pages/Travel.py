@@ -640,7 +640,7 @@ with map_col:
 
     # display city count only if there are markers
     if not locations.empty:
-        st.write(f"Displaying location on map")
+        st.write(f"📍Displaying location on map📍")
 
     # render map with flat view
     st.pydeck_chart(

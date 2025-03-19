@@ -347,7 +347,7 @@ try:
 
                     # plot gauuge chart
                     st.plotly_chart(fig, use_container_width=True)
-                st.info("All data is real-time")
+                st.info("All data is in real-time")
                 st.divider()
         elif get_recommendation:
             st.warning("Please select a state and city first to get a recommendation.")

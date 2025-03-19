@@ -128,7 +128,7 @@ try:
             unsafe_allow_html=True,
         )
         st.markdown(
-            """<h2 style="text-align:center;">Get Recommendation now in sidebar!</h2>""",
+            """<h2 style="text-align:center;"><span style="color: #FF4B4B;">Get Recommendation</span> now in sidebar!</h2>""",
             unsafe_allow_html=True,
         )
 

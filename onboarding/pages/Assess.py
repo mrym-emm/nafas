@@ -3,7 +3,7 @@ import streamlit as st
 import requests
 import plotly.graph_objects as go
 
-import urllib.parse  # for url encodiing
+
 
 st.set_page_config(
     page_title="Risk Assessment",
@@ -193,7 +193,7 @@ try:
                 # centering button
                 with col2:
                     get_recommendation = st.button(
-                        "Get Recommendations", type="primary", use_container_width=True
+                        "Get Recommendation", type="primary", use_container_width=True
                     )
 
             #  button in the sidebar

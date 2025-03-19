@@ -24,7 +24,7 @@ with open(css_path, "r") as f:
 st.markdown(
     """
     <div class="container">
-        <h1>𖠋 N A F A S 𖠋</h1>
+        <h1 style: "font-">𖠋 N A F A S 𖠋</h1>
         <h4>because every child deserves the chance to breathe</h4>
 
     </div>
@@ -478,6 +478,6 @@ for _ in range(2):
     st.write("")
 st.markdown("<b><u>More Links</u></b>", unsafe_allow_html=True)
 # this creates a links
-st.page_link("pages/Learn.py")
-st.page_link("pages/Travel.py")
-st.page_link("pages/Assess.py")
+st.page_link("pages/01_Learn.py")
+st.page_link("pages/02_Travel.py")
+st.page_link("pages/03_Assess.py")

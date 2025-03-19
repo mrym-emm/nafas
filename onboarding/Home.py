@@ -90,8 +90,7 @@ station_id_dict = {
 st.markdown(
     """
     <div class="prompt-outside">
-        <p>Real Time Air Quality Monitoring</p>
-        <h3>Should 👨‍👩‍👧‍👦👨‍👩‍👧 go out today?</h3>
+        <h3>Real Time Air Quality Monitoring</h3>
         <h3>⬇️Select a state below⬇️</h3>
         
     </div>
@@ -158,7 +157,7 @@ def get_aqi_color(aqi):
         else:
             return "#7E0023"  # marron - Hazardous
     except (ValueError, TypeError):
-        return "#E7CD78"  # will return default card color(gold) if aqi is NA/cant be retirevd
+        return "#5E8C9C"  # will return default card color(gold) if aqi is NA/cant be retirevd
 
 
 # all states and city data to correspond to aqi
@@ -230,7 +229,7 @@ st.markdown(
 .stButton button span,
 div[data-testid="stHorizontalBlock"] div[data-testid="column"] div.stButton button,
 div.stButton > button > div > p {
-    font-size: 11px !important;
+    font-size: 15px !important;
     line-height: 1.5 !important;
     font-family: "Roboto Mono", monospace !important;
 }
@@ -264,7 +263,7 @@ div.stButton {
     width: 100% !important;
     margin: 0 !important;
     display: block !important;
-    background-color: #E7CD78 !important;
+    background-color: #8FB9C7 !important;
     color: black !important;
     border: none !important;
     border-radius: 8px !important;
@@ -384,8 +383,8 @@ if st.session_state.selected_city in station_id_dict:
         <div style="
             padding: 20px;
             border-radius: 10px;
-            background-color: #E7CD78;
-            color: black;
+            background-color: #4488BF;
+            color: white;
             text-align: center;
             box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
             height: 100%;
@@ -401,12 +400,16 @@ if st.session_state.selected_city in station_id_dict:
 
     # show cards for the temp, aqi and humidity
     with col1:
-        st.markdown(card_style.format("🌤️ (°C)", temperature), unsafe_allow_html=True)
+        st.markdown(
+            card_style.format("Temp 🌤️ (°C)", temperature), unsafe_allow_html=True
+        )
 
     with col2:
         st.markdown(aqi_card_style, unsafe_allow_html=True)
     with col3:
-        st.markdown(card_style.format("💦 (%)", humidity), unsafe_allow_html=True)
+        st.markdown(
+            card_style.format("Humidity💦 (%)", humidity), unsafe_allow_html=True
+        )
 
     # add space
     for _ in range(1):
@@ -428,43 +431,60 @@ if st.session_state.selected_city in station_id_dict:
         )
     )
 
-    fig.update_layout(title="Pollutants in air")
+    fig.update_layout(
+        title={
+            "text": "Pollutants in air",
+            "font": {"size": 24},  # increase font size
+        },
+        font=dict(
+            family="Arial, sans-serif",
+            size=16,
+            color="white",
+        ),
+        xaxis=dict(
+            title_font=dict(size=18),  # increase x-axis title font size
+            tickfont=dict(size=14),  # increase x-axis tick label font size
+        ),
+        yaxis=dict(
+            title_font=dict(size=18),  # increase y-axis title font size
+            tickfont=dict(size=14),  # increase y-axis tick label font size
+        ),
+    )
 
     st.plotly_chart(fig)
 
     st.divider()
 
-    st.subheader("⬇️Open Me⬇️")
+    st.subheader("How does this affect your child?")
     # adding expander to put explanation of above metrics
-    with st.expander("How does this affect your child?"):
 
-        info_df = pd.DataFrame(
-            {
-                "Factor": [
-                    "**Temperature**",
-                    "**Air Quality Index (AQI)**",
-                    "**Humidity**",
-                    "**PM 2.5 levels**",
-                    "**PM 10 levels**",
-                    "**O\u2083 levels**",
-                ],
-                "Explanation": [
-                    "Hot weather can worsen asthma symptoms as higher temperatures can lead to increased respiratory issues. Heat can also increase air pollution levels, triggering asthma attacks in children.",
-                    "AQI indicates the quality of air. Values below 50 are generally safe, `51-100` may affect sensitive groups, and values above `100` can impact your child's respiratory health and trigger asthma symptoms.",
-                    "High humidity helps common allergens like dust mites and mold thrive, aggravating allergic asthma.",
-                    "Fine particulate matter that can penetrate deep into the lungs. Levels above `12 μg/m³` can irritate airways and trigger asthma symptoms in children.",
-                    "Larger particles that can irritate the throat and upper respiratory system. Can worsen asthma symptoms when levels exceed `50 μg/m³`.",
-                    "Ground-level ozone that forms from pollutants reacting with sunlight. Can inflame airways and reduce lung function in children with asthma, especially during outdoor activities.",
-                ],
-            }
-        )
+    info_df = pd.DataFrame(
+        {
+            "Factor": [
+                "**Temperature**",
+                "**Air Quality Index (AQI)**",
+                "**Humidity**",
+                "**PM 2.5 levels**",
+                "**PM 10 levels**",
+                "**O\u2083 levels**",
+            ],
+            "Explanation": [
+                "Hot weather can worsen asthma symptoms as higher temperatures can lead to increased respiratory issues. Heat can also increase air pollution levels, triggering asthma attacks in children.",
+                "AQI indicates the quality of air. Values below 50 are generally safe, `51-100` may affect sensitive groups, and values above `100` can impact your child's respiratory health and trigger asthma symptoms.",
+                "High humidity helps common allergens like dust mites and mold thrive, aggravating allergic asthma.",
+                "Fine particulate matter that can penetrate deep into the lungs. Levels above `12 μg/m³` can irritate airways and trigger asthma symptoms in children.",
+                "Larger particles that can irritate the throat and upper respiratory system. Can worsen asthma symptoms when levels exceed `50 μg/m³`.",
+                "Ground-level ozone that forms from pollutants reacting with sunlight. Can inflame airways and reduce lung function in children with asthma, especially during outdoor activities.",
+            ],
+        }
+    )
 
-        st.table(info_df)
+    st.table(info_df)
 
-        st.markdown(
-            "The above information is <a href='https://www.researchgate.net/publication/343404673/figure/tbl1/AS:920630392287232@1596506798348/Air-quality-index-AQI-values-PM25-and-PM10-conc-color-codes-air-pollutant-level-of.png' target='_self'>sourced.</a>",
-            unsafe_allow_html=True,
-        )
+    st.markdown(
+        "The above information is <a href='https://www.researchgate.net/publication/343404673/figure/tbl1/AS:920630392287232@1596506798348/Air-quality-index-AQI-values-PM25-and-PM10-conc-color-codes-air-pollutant-level-of.png' target='_self'>sourced.</a>",
+        unsafe_allow_html=True,
+    )
 
 
 else:

@@ -1,4 +1,3 @@
-from streamlit_searchbox import st_searchbox
 import pandas as pd
 import streamlit as st
 import requests
@@ -13,112 +12,125 @@ st.set_page_config(
     initial_sidebar_state="auto",
 )
 
+state_cities_dict = {
+    "Kuala Lumpur": [
+        "Kuala Lumpur",
+        "Bukit Bintang",
+        "Chow Kit",
+        "Bangsar",
+        "Mont Kiara",
+        "Brickfields",
+        "Cheras",
+    ],
+    "Selangor": [
+        "Shah Alam",
+        "Petaling Jaya",
+        "Subang Jaya",
+        "Klang",
+        "Puchong",
+        "Putrajaya",
+        "Kota Damansara",
+    ],
+    "Terengganu": ["Kemaman"],
+}
+city_coordinates = {
+    "Kuala Lumpur": {
+        "lat": 3.140853,
+        "lon": 101.693207,
+    },
+    "Bukit Bintang": {
+        "lat": 3.146708,
+        "lon": 101.711197,
+    },
+    "Chow Kit": {
+        "lat": 3.165186,
+        "lon": 101.6988038,
+    },
+    "Bangsar": {
+        "lat": 3.13083,
+        "lon": 101.66944,
+    },
+    "Kemaman": {
+        "lat": 4.2193065,
+        "lon": 103.4225158,
+    },
+    "Mont Kiara": {
+        "lat": 3.1699988,
+        "lon": 101.6521467,
+    },
+    "Brickfields": {
+        "lat": 3.1288572,
+        "lon": 101.6845528,
+    },
+    "Cheras": {
+        "lat": 3.0991919,
+        "lon": 101.7374229,
+    },
+    "Shah Alam": {
+        "lat": 3.0739429,
+        "lon": 101.5185278,
+    },
+    "Petaling Jaya": {
+        "lat": 3.1073,
+        "lon": 101.6067,
+    },
+    "Puchong": {
+        "lat": 3.0342324,
+        "lon": 101.6170345,
+    },
+    "Putrajaya": {
+        "lat": 2.9264,
+        "lon": 101.6964,
+    },
+    "Subang Jaya": {
+        "lat": 3.051487,
+        "lon": 101.5823339,
+    },
+    "Klang": {
+        "lat": 3.0448394,
+        "lon": 101.4447363,
+    },
+    "Kota Damansara": {
+        "lat": 3.1536719,
+        "lon": 101.593544,
+    },
+}
+
 try:
     # getting current user aqi, pm2.5
-    def get_user_current_info():
-        # citites df
-        cities_df = pd.DataFrame(
-            {
-                "city": [
-                    # kl
-                    "Kuala Lumpur",
-                    "Bukit Bintang",
-                    "Chow Kit",
-                    "Kampung Baru",
-                    "Bangsar",
-                    "Mont Kiara",
-                    "Brickfields",
-                    "Sentul",
-                    "Wangsa Maju",
-                    "Setapak",
-                    "Kepong",
-                    "Segambut",
-                    "Cheras",
-                    "Sri Petaling",
-                    "Desa Petaling",
-                    # slgr
-                    "Shah Alam",
-                    "Petaling Jaya",
-                    "Subang Jaya",
-                    "Klang",
-                    "Ampang",
-                    "Kajang",
-                    "Bangi",
-                    "Puchong",
-                    "Rawang",
-                    "Semenyih",
-                    "Cyberjaya",
-                    "Putrajaya",
-                    "Sepang",
-                    "Damansara",
-                    "Gombak",
-                    "Port Klang",
-                    "Sungai Buloh",
-                    "Hulu Langat",
-                    "Kemaman",
-                ]
-            }
+    def get_aqi_city(city):
+        # geo_url = f"https://nominatim.openstreetmap.org/search?city={city}&country=Malaysia&format=json"
+        # response = requests.get(geo_url, headers={"User-Agent": "ActivityRiskApp"})
+        # data = response.json()
+        # lat, long = data[0].get("lat"), data[0].get("lon")
+        lat = city_coordinates[city]["lat"]
+        long = city_coordinates[city]["lon"]
+
+        aqi_url = f"http://api.waqi.info/feed/geo:{lat};{long}/?token=78d4dab9fd82b3952d79356efc7c1bd46763f540"
+
+        aqi_response = requests.get(aqi_url)
+        aqi_data = aqi_response.json()
+
+        aqi = aqi_data["data"]["aqi"]
+        pm25 = (
+            aqi_data["data"]
+            .get("forecast", {})
+            .get("daily", {})
+            .get("pm25", [{}])[0]
+            .get("avg", "N/A")
         )
 
-        def search_dataframe(searchterm: str) -> list:
-            # search the city df
-            if not searchterm:
-                return []
-
-            # allwoing case insensitibve
-            results = cities_df[cities_df["city"].str.contains(searchterm, case=False)][
-                "city"
-            ].tolist()
-            return results
-
-        # pass search function to the searchbox
-        selected_value = st_searchbox(
-            search_dataframe,
-            placeholder="Insert city...",
-            key="df_search",
-        )
-
-        if selected_value:
-            # selected_city_row = cities_df[cities_df["city"] == selected_value]
-
-            # reassinging the selcted value to the city name
-            city_name = selected_value
-
-            # encode city name to handle spaces
-            encoded_city = urllib.parse.quote(city_name)
-
-            def get_aqi_city(city):
-                geo_url = f"https://nominatim.openstreetmap.org/search?city={city}&country=Malaysia&format=json"
-                response = requests.get(
-                    geo_url, headers={"User-Agent": "ActivityRiskApp"}
-                )
-                data = response.json()
-                lat, long = data[0].get("lat"), data[0].get("lon")
-
-                aqi_url = f"http://api.waqi.info/feed/geo:{lat};{long}/?token=78d4dab9fd82b3952d79356efc7c1bd46763f540"
-
-                aqi_response = requests.get(aqi_url)
-                aqi_data = aqi_response.json()
-
-                aqi = aqi_data["data"]["aqi"]
-                pm25 = (
-                    aqi_data["data"]
-                    .get("forecast", {})
-                    .get("daily", {})
-                    .get("pm25", [{}])[0]
-                    .get("avg", "N/A")
-                )
-
-                return aqi, pm25
-
-            # getting the values
-            aqi, pm25 = get_aqi_city(encoded_city)
-
-            return aqi, pm25
+        return aqi, pm25
 
     def activity_risk_assessment_page():
-        st.title("Should my child go outside?")
-        st.subheader("Find out now by taking our assessment check in the sidebar!")
+        st.markdown(
+            """<h1 style="text-align:center;">Should my child go outside?</h1>""",
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            """<h2 style="text-align:center;">Get Recommendation now in sidebar!</h2>""",
+            unsafe_allow_html=True,
+        )
 
         st.divider()
 
@@ -126,27 +138,69 @@ try:
         main_content_placeholder = st.empty()
 
         with st.sidebar:
-            st.header("⬇️Fill in the below⬇️")
-            st.subheader("Please enter city")
-            aqi, pm25 = get_user_current_info()
+            st.subheader("Location")
+
+            col1, col2 = st.columns(2)
+
+            with col1:
+                selected_state = ["Select State"] + list(state_cities_dict.keys())
+                # so user can select available city
+                select_location_state = st.selectbox(
+                    "Select State", options=selected_state
+                )
+
+            with col2:
+                # only get state when user select
+                if select_location_state != "Select State":
+                    # filter city based on the state selected above
+                    cities_for_selected_state = state_cities_dict[select_location_state]
+                    select_location_city = st.selectbox(
+                        "Select City",
+                        options=["Select City"] + cities_for_selected_state,
+                    )
+
+                    if select_location_city != "Select City":
+                        city_name = select_location_city
+                        # encode city name to handle spaces
+                        # encoded_city = urllib.parse.quote(city_name)
+
+                        aqi, pm25 = get_aqi_city(city_name)
+                        # st.write(aqi, pm25)
+                else:
+                    # if no state selected, disable city box
+                    st.selectbox("Select City", options=["Select City"], disabled=True)
+                    aqi, pm25 = None, None
 
             # st.divider()
 
             st.header("Asthma Information")
             asthma_severity = st.selectbox(
                 "Asthma Severity Level",
-                ["Moderate", "Severe", "Life Threatening"],
-                index=1,
+                ["Select Asthma Severity", "Moderate", "Severe", "Life Threatening"],
             )
             st.divider()
 
-            st.write("⬇️Click Me⬇️")
+            get_recommendation = None
+            # st.write("⬇️Click Me⬇️")
+
+            # prevent user to select button
+            if (
+                select_location_state != "Select State"
+                and select_location_city != "Select City"
+                and asthma_severity != "Select Asthma Severity"
+            ):
+                col1, col2, col3 = st.columns([0.1, 1, 0.1])
+                # centering button
+                with col2:
+                    get_recommendation = st.button(
+                        "Get Recommendations", type="primary", use_container_width=True
+                    )
 
             #  button in the sidebar
-            get_recommendation = st.button("Get Recommendations", type="primary")
+            # get_recommendation = st.button("Get Recommendations", type="primary")
 
-        # cehck if rec button is presed
-        if get_recommendation:
+        # check if rec button is presed and if we have AQI data
+        if get_recommendation and aqi is not None and pm25 is not None:
             # display belwo in placeholder main page
             with main_content_placeholder.container():
                 st.header("The verdict?")
@@ -291,9 +345,12 @@ try:
                         )
                     )
 
-                    # Display the figure in Streamlit
+                    # plot gauuge chart
                     st.plotly_chart(fig, use_container_width=True)
+                st.info("All data is real-time")
                 st.divider()
+        elif get_recommendation:
+            st.warning("Please select a state and city first to get a recommendation.")
 
         # this is the block to describe the inputs
         else:
@@ -420,5 +477,6 @@ try:
                     )
 
     activity_risk_assessment_page()
-except:
-    print("")
+except Exception as e:
+    # show error
+    st.error(f"An error occurred: {str(e)}")

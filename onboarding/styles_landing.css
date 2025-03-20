@@ -11,7 +11,7 @@ body {
 
 h1 {
     font-weight: 200 !important;  
-    font-size: 2em !important;
+    color: #DEB64B !important; 
     text-align: center !important;
     letter-spacing: 5px !important;
     opacity: 0;
@@ -68,7 +68,7 @@ h4 {
     }
 }
 
-/* Fade-out Animation */
+/* fade-out Animation */
 @keyframes fadeOut {
     from {
         opacity: 1;
@@ -84,17 +84,6 @@ h4 {
     top: 20vh;  
 }
 
-/* for buttons */
-/* Style all buttons the same way */
-/* .stButton > button {
-    font-size: 6px !important;
-    font-weight: 500 !important;
-} */
 
-/* Hover effect for all buttons */
-/* .stButton > button:hover {
-    transform: translateY(-2px) !important;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
-} */
 
 

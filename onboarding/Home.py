@@ -20,23 +20,42 @@ with open(css_path, "r") as f:
     st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
 
 
-# landing page
-st.markdown(
-    """
-    <div class="container">
-        <h1 style: "font-">𖠋 N A F A S 𖠋</h1>
-        <h4>because every child deserves the chance to breathe</h4>
+# # landing page
+# st.markdown(
+#     """
+#     <div class="container">
+#         <h1 style: "font-">𖠋 N A F A S 𖠋</h1>
+#         <h4>because every child deserves the chance to breathe</h4>
 
-    </div>
+#     </div>
 
 
-    """,
-    unsafe_allow_html=True,
-)
+#     """,
+#     unsafe_allow_html=True,
+# )
 
 
 # give delay
-time.sleep(5)
+# time.sleep(5)
+
+st.markdown(
+    """
+<style>
+@keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+.animated-img {
+    width: 100%;
+    max-width: 600px;
+    animation: fadeIn 1.5s ease-in;
+}
+</style>
+<img src="https://i.imgur.com/41GnxlX.png" class="animated-img">
+""",
+    unsafe_allow_html=True,
+)
 
 st.divider()
 

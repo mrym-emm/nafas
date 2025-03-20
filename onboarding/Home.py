@@ -38,6 +38,8 @@ st.markdown(
 # give delay
 time.sleep(5)
 
+st.divider()
+
 # the api token to retireve real time data
 API_TOKEN = "78d4dab9fd82b3952d79356efc7c1bd46763f540"
 
@@ -151,9 +153,9 @@ def get_aqi_color(aqi):
     try:
         aqi_value = int(aqi)
         if aqi_value <= 50:
-            return "#6BBF59"  # green is okay
+            return "#97cf8a"  # green is okay
         elif aqi_value <= 100:
-            return "#FFBF00"  # yello is moderate
+            return "#ffde1a"  # yello is moderate
         else:
             return "#7E0023"  # marron - Hazardous
     except (ValueError, TypeError):
@@ -364,8 +366,19 @@ if st.session_state.selected_city in station_id_dict:
     if int(aqi) <= 49:
         for _ in range(2):
             st.write(" ")
+        # st.markdown(
+        #     "<div style='text-align: center; font-family: \"Roboto Mono\", monospace;'>😷Generally safe, consider masks for sever asthma child!😷</div>",
+        #     unsafe_allow_html=True,
+        # )
+        # st.success("😷Generally safe, consider masks for sever asthma child!😷")
         st.markdown(
-            "<div style='text-align: center; font-family: \"Roboto Mono\", monospace;'>😷Generally safe, consider masks for sever asthma child!😷</div>",
+            """
+    <div style="text-align: center;">
+        <div style="background-color: #97cf8a; padding: 10px; border-radius: 5px; color: #155724;">
+            <b>😷Generally safe, consider masks for severe asthma child!😷</b>
+        </div>
+    </div>
+    """,
             unsafe_allow_html=True,
         )
 
@@ -373,8 +386,19 @@ if st.session_state.selected_city in station_id_dict:
 
         for _ in range(2):
             st.write(" ")
+        # st.markdown(
+        #     "<div style='text-align: center; font-family: \"Roboto Mono\", monospace;'>❗Children should limit prolong exposure (2-3 hours)!❗</div>",
+        #     unsafe_allow_html=True,
+        # )
+
         st.markdown(
-            "<div style='text-align: center; font-family: \"Roboto Mono\", monospace;'>❗Children should limit prolong exposure!❗</div>",
+            """
+    <div style="text-align: center;">
+        <div style="background-color: #ffde1a; padding: 10px; border-radius: 5px; color: #155724;">
+            ❗<b>Children should limit prolong exposure (2-3 hours)</b>❗
+        </div>
+    </div>
+    """,
             unsafe_allow_html=True,
         )
 
@@ -406,52 +430,77 @@ if st.session_state.selected_city in station_id_dict:
 
     with col2:
         st.markdown(aqi_card_style, unsafe_allow_html=True)
+
     with col3:
         st.markdown(
             card_style.format("Humidity💦 (%)", humidity), unsafe_allow_html=True
         )
 
-    # add space
-    for _ in range(1):
-        st.write("")
+    st.divider()
 
-    labels_pollutant = ["PM2.5", "PM10", "O\u2083"]
-    pollutant_data = [pm25, pm10, o3]
+    col1, col2 = st.columns([2, 0.7])
 
-    pollutant_df = pd.DataFrame(
-        {"Pollutant": labels_pollutant, "Value": pollutant_data}
-    )
+    # centering indicator
+    with col2:
 
-    # create fig in plotly
-    fig = go.Figure(
-        data=go.Bar(
-            x=labels_pollutant,
-            y=pollutant_data,
-            marker_color=["#FF9999", "#66B2FF", "#99FF99"],
+        st.markdown(
+            """ <div style="display: flex; justify-content: left;">
+            <div style = "text-align: left;
+                width: fit-content;
+                padding: 15px;
+                border: 2px solid white;
+                border-radius: 10px;
+                background-color: #1e1e1e;
+                color: white;">
+                <h6>AQI Color Indicator</h6>
+            <p>🟢: AQI less than 50<br></p>
+            <p>🟡: AQI between 51 & 100</p>
+            <p>🔴: AQI more than 150</p>
+            </div>
+            </div>""",
+            unsafe_allow_html=True,
         )
-    )
 
-    fig.update_layout(
-        title={
-            "text": "Pollutants in air",
-            "font": {"size": 24},  # increase font size
-        },
-        font=dict(
-            family="Arial, sans-serif",
-            size=16,
-            color="white",
-        ),
-        xaxis=dict(
-            title_font=dict(size=18),  # increase x-axis title font size
-            tickfont=dict(size=14),  # increase x-axis tick label font size
-        ),
-        yaxis=dict(
-            title_font=dict(size=18),  # increase y-axis title font size
-            tickfont=dict(size=14),  # increase y-axis tick label font size
-        ),
-    )
+    with col1:
 
-    st.plotly_chart(fig)
+        labels_pollutant = ["PM2.5", "PM10", "O\u2083"]
+        pollutant_data = [pm25, pm10, o3]
+
+        pollutant_df = pd.DataFrame(
+            {"Pollutant": labels_pollutant, "Value": pollutant_data}
+        )
+
+        # create fig in plotly
+        fig = go.Figure(
+            data=go.Bar(
+                x=labels_pollutant,
+                y=pollutant_data,
+                marker_color=["#DC6D18", "#66B2FF", "#FEFAE0"],
+            )
+        )
+
+        fig.update_layout(
+            title={
+                "text": "Pollutants in air",
+                "font": {"size": 24},  # increase font size
+            },
+            font=dict(
+                family="Arial, sans-serif",
+                size=16,
+                color="white",
+            ),
+            xaxis=dict(
+                title_font=dict(size=18),  # increase x-axis title font size
+                tickfont=dict(size=14),  # increase x-axis tick label font size
+            ),
+            yaxis=dict(
+                title_font=dict(size=18),  # increase y-axis title font size
+                tickfont=dict(size=14),
+                showgrid=False,  # increase y-axis tick label font size
+            ),
+        )
+
+        st.plotly_chart(fig)
 
     st.divider()
 
@@ -482,7 +531,7 @@ if st.session_state.selected_city in station_id_dict:
     st.table(info_df)
 
     st.markdown(
-        "The above information is <a href='https://www.researchgate.net/publication/343404673/figure/tbl1/AS:920630392287232@1596506798348/Air-quality-index-AQI-values-PM25-and-PM10-conc-color-codes-air-pollutant-level-of.png' target='_self'>sourced.</a>",
+        "The above information is <a href='https://www.researchgate.net/publication/343404673/figure/tbl1/AS:920630392287232@1596506798348/Air-quality-index-AQI-values-PM25-and-PM10-conc-color-codes-air-pollutant-level-of.png' target='_blank'>sourced.</a>",
         unsafe_allow_html=True,
     )
 

@@ -359,7 +359,7 @@ try:
                             value=aqi,
                             title={"text": "AQI"},
                             gauge={
-                                "axis": {"range": [0, 100], "tickwidth": 1},
+                                "axis": {"range": [0, 250], "tickwidth": 1},
                                 "bar": {"color": gauge_color},
                             },
                         )

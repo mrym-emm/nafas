@@ -325,7 +325,7 @@ try:
                             "Limited outdoor activity recommended, keep sessions short"
                         )
                 elif aqi <= 150:
-                    if asthma_severity == "Moderate":
+                    if asthma_ity == "Moderate":
                         recommendation = "Generally safe, but monitor symptoms"
                     elif asthma_severity == "Severe":
                         recommendation = "Caution advised, limit strenuous activities"
@@ -470,7 +470,7 @@ try:
                 st.markdown(
                     """
                     <div style="text-align: center;text-decoration: underline">
-                        <h5>😷How sever is your child's asthma?😷</h5>
+                        <h5>😷How severe is your child's asthma?😷</h5>
                     </div>""",
                     unsafe_allow_html=True,
                 )

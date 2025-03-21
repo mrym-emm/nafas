@@ -73,7 +73,7 @@ with tab1:
     )
 
     st.markdown(
-        "The below information is curated from the <a href='https://www.asthmafoundation.org.nz/assets/documents/Managing-your-childs-asthma.pdf' target='_self'>Asthma Respiratory + Foundation NZ</a>.",
+        "The below information is curated from the <a href='https://www.asthmafoundation.org.nz' target='_blank'>Asthma Respiratory Foundation NZ</a>.",
         unsafe_allow_html=True,
     )
 

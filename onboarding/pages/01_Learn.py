@@ -379,7 +379,7 @@ with tab2:
             # insights
 
             st.markdown(
-                """<p style = "text-align: justify;">Air quality has gone up and down over the years, with all states experiencing similar patterns - like when everyone's air quality worsened dramatically in 2019, during the <a href='https://en.wikipedia.org/wiki/2019_Southeast_Asian_haze' target='_blank'>2019 ASEAN Haze</a>. However, the data shows childhood asthma cases (gray bars) reached their highest levels around 2008-2011, despite AQI readings being in a relatively moderate range during that period. This suggests factors beyond air quality may have influenced asthma rates during those years. There was also a notable improvement period around 2017-2018, when both AQI readings and asthma cases were at their lowest.</p>""",
+                """<p style = "text-align: justify;">Air quality has gone up and down over the years, with all states experiencing similar patterns, like when everyone's air quality worsened dramatically in 2019, during the <a href='https://en.wikipedia.org/wiki/2019_Southeast_Asian_haze' target='_blank'>2019 ASEAN Haze</a>. However, the data shows childhood asthma cases (gray bars) reached their highest levels around 2008-2011, despite AQI readings being in a relatively moderate range during that period. This suggests factors beyond air quality may have influenced asthma rates during those years. There was also a notable improvement period around 2017-2018, when both AQI readings and asthma cases were at their lowest.</p>""",
                 unsafe_allow_html=True,
             )
 

@@ -520,6 +520,7 @@ try:
                         """<p>Source: <a href='https://www.physio-pedia.com/images/0/0b/Screen_Shot_2017-01-25_at_12.53.38_AM.png' target='_blank' >Physiopedia</a> </p>""",
                         unsafe_allow_html=True,
                     )
+                st.divider()
 
     activity_risk_assessment_page()
 except Exception as e:

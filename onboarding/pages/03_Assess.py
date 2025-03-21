@@ -12,86 +12,176 @@ st.set_page_config(
 )
 
 state_cities_dict = {
-    "Kuala Lumpur": [
-        "Kuala Lumpur",
-        "Bukit Bintang",
-        "Chow Kit",
-        "Bangsar",
-        "Mont Kiara",
-        "Brickfields",
-        "Cheras",
-    ],
+    "Kuala Lumpur": ["Bukit Bintang", "Batu Caves", "Cheras"],
     "Selangor": [
         "Shah Alam",
         "Petaling Jaya",
         "Subang Jaya",
         "Klang",
-        "Puchong",
         "Putrajaya",
-        "Kota Damansara",
+        "Banting",
     ],
-    "Terengganu": ["Kemaman"],
+    "Johor": ["Pengerang", "Larkin", "Batu Pahat"],
+    "Kedah": ["Kulim", "Sungai Petani", "Langkawi"],
+    "Kelantan": ["Tanah Merah", "Kota Bharu"],
+    "Melaka": ["Alor Gajah", "Bandarraya Melaka"],
+    "Negeri Sembilan": ["Seremban", "Port Dickson"],
+    "Pahang": ["Kuantan", "Rompin", "Temerloh"],
+    "Perak": ["Ipoh", "Tanjung Malim"],
+    "Perlis": ["Kangar"],
+    "Penang": ["Balik Pulau", "Perai"],
+    "Terengganu": ["Besut", "Kemaman", "Kuala Terengganu"],
+    "Sabah": ["Sandakan", "Tawau"],
+    "Sarawak": ["Bintulu", "Kuching"],
 }
 city_coordinates = {
-    "Kuala Lumpur": {
-        "lat": 3.140853,
-        "lon": 101.693207,
+    "Batu Caves": {
+        "lat": 3.237400,
+        "lon": 101.683907,
     },
     "Bukit Bintang": {
         "lat": 3.146708,
         "lon": 101.711197,
     },
-    "Chow Kit": {
-        "lat": 3.165186,
-        "lon": 101.6988038,
-    },
-    "Bangsar": {
-        "lat": 3.13083,
-        "lon": 101.66944,
-    },
-    "Kemaman": {
-        "lat": 4.2193065,
-        "lon": 103.4225158,
-    },
-    "Mont Kiara": {
-        "lat": 3.1699988,
-        "lon": 101.6521467,
-    },
-    "Brickfields": {
-        "lat": 3.1288572,
-        "lon": 101.6845528,
-    },
     "Cheras": {
-        "lat": 3.0991919,
-        "lon": 101.7374229,
+        "lat": 3.078541,
+        "lon": 101.7502028,
     },
     "Shah Alam": {
-        "lat": 3.0739429,
-        "lon": 101.5185278,
+        "lat": 3.09060700,
+        "lon": 101.52959690,
     },
     "Petaling Jaya": {
-        "lat": 3.1073,
-        "lon": 101.6067,
-    },
-    "Puchong": {
-        "lat": 3.0342324,
-        "lon": 101.6170345,
-    },
-    "Putrajaya": {
-        "lat": 2.9264,
-        "lon": 101.6964,
+        "lat": 3.127887,
+        "lon": 101.594490,
     },
     "Subang Jaya": {
-        "lat": 3.051487,
-        "lon": 101.5823339,
+        "lat": 3.0567333,
+        "lon": 101.585119,
     },
     "Klang": {
-        "lat": 3.0448394,
-        "lon": 101.4447363,
+        "lat": 3.044917,
+        "lon": 101.445564,
     },
-    "Kota Damansara": {
-        "lat": 3.1536719,
-        "lon": 101.593544,
+    "Putrajaya": {
+        "lat": 2.92636100,
+        "lon": 101.69644500,
+    },
+    "Banting": {
+        "lat": 2.80950900,
+        "lon": 101.50415500,
+    },
+    "Pengerang": {
+        "lat": 1.3647023,
+        "lon": 104.111110,
+    },
+    "Larkin": {
+        "lat": 1.498622,
+        "lon": 103.717529,
+    },
+    "Batu Pahat": {
+        "lat": 1.8548,
+        "lon": 102.9325,
+    },
+    "Kulim": {
+        "lat": 5.389450,
+        "lon": 100.563431,
+    },
+    "Sungai Petani": {
+        "lat": 5.636401,
+        "lon": 100.4877883,
+    },
+    "Langkawi": {
+        "lat": 6.350000,
+        "lon": 99.800003,
+    },
+    "Tanah Merah": {
+        "lat": 5.808887,
+        "lon": 102.1470772,
+    },
+    "Kota Bharu": {
+        "lat": 6.127463,
+        "lon": 102.242287,
+    },
+    "Alor Gajah": {
+        "lat": 2.4472366,
+        "lon": 102.1821816,
+    },
+    "Bandarraya Melaka": {
+        "lat": 2.200844,
+        "lon": 102.240143,
+    },
+    "Seremban": {
+        "lat": 2.7297,
+        "lon": 101.9381,
+    },
+    "Port Dickson": {
+        "lat": 2.522540,
+        "lon": 101.796295,
+    },
+    "Kuantan": {
+        "lat": 3.763386,
+        "lon": 103.220184,
+    },
+    "Rompin": {
+        "lat": 2.80029800,
+        "lon": 103.4858149,
+    },
+    "Temerloh": {
+        "lat": 3.45315900,
+        "lon": 102.42448990,
+    },
+    "Ipoh": {
+        "lat": 4.58410000,
+        "lon": 101.08290000,
+    },
+    "Tanjung Malim": {
+        "lat": 3.6880019,
+        "lon": 101.5285031,
+    },
+    "Tanjung Malim": {
+        "lat": 3.6880019,
+        "lon": 101.5285031,
+    },
+    "Kangar": {
+        "lat": 6.443589,
+        "lon": 100.216599,
+    },
+    "Balik Pulau": {
+        "lat": 5.3376014,
+        "lon": 100.2211739,
+    },
+    "Perai": {
+        "lat": 5.3777664,
+        "lon": 100.3819635,
+    },
+    "Besut": {
+        "lat": 5.82008900,
+        "lon": 102.53766600,
+    },
+    "Kemaman": {
+        "lat": 4.2284464,
+        "lon": 103.4108272,
+    },
+    "Kuala Terengganu": {
+        "lat": 5.31173700,
+        "lon": 103.11991200,
+    },
+    "Sandakan": {
+        "lat": 5.84561000,
+        "lon": 118.05705610,
+    },
+    "Tawau": {
+        "lat": 4.28245700,
+        "lon": 117.91478700,
+    },
+    "Bintulu": {
+        "lat": 3.16667,
+        "lon": 113.03333,
+    },
+    "Kuching": {
+        "lat": 1.55,
+        "lon": 110.33333,
     },
 }
 
@@ -203,55 +293,11 @@ try:
             # display belwo in placeholder main page
             with main_content_placeholder.container():
                 st.header("The verdict?")
-
-                # since thers a few factors, will rank
-                if aqi <= 50:
-                    aqi_category = "Good"
-                elif aqi <= 100:
-                    aqi_category = "Moderate"
-                elif aqi <= 150:
-                    aqi_category = "Unhealthy for Sensitive Groups"
-                elif aqi <= 200:
-                    aqi_category = "Unhealthy"
-                elif aqi <= 300:
-                    aqi_category = "Very Unhealthy"
-                else:
-                    aqi_category = "Hazardous"
-
-                # determine category based on PM2.5
-                if pm25 <= 12:
-                    pm25_category = "Good"
-                elif pm25 <= 35.4:
-                    pm25_category = "Moderate"
-                elif pm25 <= 55.4:
-                    pm25_category = "Unhealthy for Sensitive Groups"
-                elif pm25 <= 150.4:
-                    pm25_category = "Unhealthy"
-                elif pm25 <= 250.4:
-                    pm25_category = "Very Unhealthy"
-                else:
-                    pm25_category = "Hazardous"
-
-                # compare which one is worser, pm2.5 or AQI
-                category_ranking = [
-                    "Good",
-                    "Moderate",
-                    "Unhealthy for Sensitive Groups",
-                    "Unhealthy",
-                    "Very Unhealthy",
-                    "Hazardous",
-                ]
-                aqi_rank = category_ranking.index(aqi_category)
-                pm25_rank = category_ranking.index(pm25_category)
-
-                if pm25_rank > aqi_rank:
-                    air_quality_category = pm25_category
-                else:
-                    air_quality_category = aqi_category
-
-                # now check asthma severity
                 recommendation = ""
-                if air_quality_category == "Good":
+
+                # recommendation based on aqi
+                if aqi <= 50:
+                    # aqi_category = "Good"
                     if asthma_severity == "Moderate":
                         recommendation = (
                             "Safe for outdoor activities with normal precautions"
@@ -264,27 +310,27 @@ try:
                         recommendation = (
                             "Limited outdoor activity recommended, keep sessions short"
                         )
+                elif aqi <= 100:
 
-                elif air_quality_category == "Moderate":
+                    if asthma_severity == "Moderate":
+                        recommendation = (
+                            "Safe for outdoor activities with normal precautions"
+                        )
+                    elif asthma_severity == "Severe":
+                        recommendation = (
+                            "Safe with extra precautions and medication on hand"
+                        )
+                    elif asthma_severity == "Life Threatening":
+                        recommendation = (
+                            "Limited outdoor activity recommended, keep sessions short"
+                        )
+                elif aqi <= 150:
                     if asthma_severity == "Moderate":
                         recommendation = "Generally safe, but monitor symptoms"
                     elif asthma_severity == "Severe":
                         recommendation = "Caution advised, limit strenuous activities"
                     elif asthma_severity == "Life Threatening":
                         recommendation = "Indoor activities recommended"
-
-                elif air_quality_category == "Unhealthy for Sensitive Groups":
-                    if asthma_severity == "Moderate":
-                        recommendation = (
-                            "Safe with frequent breaks and monitoring symptoms"
-                        )
-                    else:
-                        recommendation = "Outdoor activities not recommended"
-
-                else:  # worst case scenario
-                    recommendation = (
-                        "Outdoor activities not recommended for children with asthma"
-                    )
 
                 # display assesmment
                 if "not recommended" in recommendation:
@@ -338,7 +384,7 @@ try:
                             value=pm25,
                             title={"text": "PM2.5"},
                             gauge={
-                                "axis": {"range": [0, 100], "tickwidth": 1},
+                                "axis": {"range": [0, 250], "tickwidth": 1},
                                 "bar": {"color": gauge_color},
                             },
                         )
